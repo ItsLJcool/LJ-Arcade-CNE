@@ -45,7 +45,10 @@ function preStateSwitch() {
             var split = fileName.split(".");
             if (split[0] != customPrefix) continue;
             var requestedState = Type.getClassName(Type.getClass(FlxG.game._requestedState)).split(".");
-            if (requestedState[requestedState.length-1] == split[split.length-1]) {
+            trace(requestedState[requestedState.length-1] + " | " + fileName + " | " + );
+            if (requestedState[requestedState.length-1] == split[split.length-1]
+                || (FlxG.game._requestedState == ModState) && (FlxG.game._requestedState.lastName == split[split.length-1])) {
+                trace("LJ Arcade Specific State Found!");
 				FlxG.game._requestedState = new ModState(fileName);
                 return;
             }

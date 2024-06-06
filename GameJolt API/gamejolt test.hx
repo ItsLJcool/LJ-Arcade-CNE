@@ -52,10 +52,11 @@ public var GameJolt = {
 	lastUnlockedTrophy: null,
 	unlockTrophy: function(trophyString) {
 		var id:Int = -1;
+		trace(Trophies.exist(trophyString));
 		if (Trophies.exist(trophyString)) id = Trophies.get(trophyString);
 		Main.execAsync(function() {
 			var trophy = GameJolt.get('trophies', [{name: 'username', value: GameJolt.username}, {name: 'user_token', value: GameJolt.token}, {name: 'trophy_id', value: id}]).response.trophies[0];
-            // trace(trophy);
+            trace(trophy);
 			if (!trophy.achieved) {
 				GameJolt.set('trophies/add-achieved', [{name: 'username', value: GameJolt.username}, {name: 'user_token', value: GameJolt.token}, {name: 'trophy_id', value: id}]);
 				GameJolt.lastUnlockedTrophy = trophy;

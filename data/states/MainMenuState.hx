@@ -3,7 +3,7 @@ import funkin.game.PlayState;
 import funkin.backend.assets.ModsFolder;
 import StringTools;
 import haxe.Json;
-importScript('GameJolt API/gamejolt test'); // local path
+// importScript('GameJolt API/gamejolt test'); Redoing GameJolt shit anyways
 
 function create() {
     trace("YIPEE");
@@ -12,13 +12,7 @@ function create() {
 function update(elapsed) {
     if (FlxG.keys.justPressed.O) {
         // test();
-        // GameJolt.unlockTrophy(235015);
-        var what = GameJolt.setSave("what", {testy: "fire emojli"});
-
-        trace(what);
-        
-        what = GameJolt.getSave("what");
-        trace(what);
+        FlxG.switchState(new ModState("TemporaryTestingState"));
     }
     if (FlxG.keys.justPressed.P) {
         // loadTest("Treeshot-Funkin");
