@@ -11,8 +11,9 @@ function create() {
 
 function update(elapsed) {
     if (FlxG.keys.justPressed.O) {
-        // test();
-        FlxG.switchState(new ModState("TemporaryTestingState"));
+        // FlxG.switchState(new ModState("TemporaryTestingState"));
+        openQueuedSubState(new ModSubState("TestSubState"));
+        // openSubState(new ModSubState("TestSubState"));
     }
     if (FlxG.keys.justPressed.P) {
         // loadTest("Treeshot-Funkin");
