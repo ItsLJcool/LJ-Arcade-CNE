@@ -6,7 +6,7 @@ import haxe.Json;
 // importScript('GameJolt API/gamejolt test'); Redoing GameJolt shit anyways
 
 function create() {
-    trace("YIPEE");
+    
 }
 
 function update(elapsed) {

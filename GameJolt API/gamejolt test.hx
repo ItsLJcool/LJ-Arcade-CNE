@@ -12,10 +12,6 @@ import funkin.backend.assets.ModsFolder;
 
 public function getGameJoltName() { return Base64.decode(Assets.getText(Paths.getPath("GameJolt API/TOKEN"))).toString(); }
 
-public var Trophies = [
-	"Too Cool" => 235015
-];
-
 public var GameJolt = {
 	http: new Http(''),
 	id: 901749,
@@ -50,10 +46,8 @@ public var GameJolt = {
 	getSave: function(key:String) { return GameJolt.get("data-store", [{name: "key", value: key}]); },
 
 	lastUnlockedTrophy: null,
-	unlockTrophy: function(trophyString) {
-		var id:Int = -1;
-		trace(Trophies.exist(trophyString));
-		if (Trophies.exist(trophyString)) id = Trophies.get(trophyString);
+	unlockTrophy: function(trophyId) {
+		var id:Int = trophyId;
 		Main.execAsync(function() {
 			var trophy = GameJolt.get('trophies', [{name: 'username', value: GameJolt.username}, {name: 'user_token', value: GameJolt.token}, {name: 'trophy_id', value: id}]).response.trophies[0];
             trace(trophy);
@@ -66,11 +60,3 @@ public var GameJolt = {
 		});
 	}
 };
-
-function new() {
-	/**
-		auto compile keys items to values of itself
-		example: a map of ["among us" => 15] will turn into ["among us" => 15, 15 => 15]
-	*/
-	for (things in Trophies.keys()) { Trophies.set(Trophies.get(things)); }
-}

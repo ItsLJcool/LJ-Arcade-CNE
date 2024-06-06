@@ -15,6 +15,7 @@ import funkin.backend.chart.EventsData;
 
 import funkin.savedata.FunkinSave;
 function create() {
+    trace("bruh");
 }
 
 
@@ -34,7 +35,7 @@ function preStateSwitch() {
         trace("PlayState opening");
         EventsData.reloadEvents();
     }
-
+    trace("whar");
 	if (!initialized) {
 		initialized = true;
 		//FlxG.game._requestedState = new ModState('WarningState');
@@ -45,10 +46,9 @@ function preStateSwitch() {
             var split = fileName.split(".");
             if (split[0] != customPrefix) continue;
             var requestedState = Type.getClassName(Type.getClass(FlxG.game._requestedState)).split(".");
-            trace(requestedState[requestedState.length-1] + " | " + fileName + " | " + );
+            
             if (requestedState[requestedState.length-1] == split[split.length-1]
-                || (FlxG.game._requestedState == ModState) && (FlxG.game._requestedState.lastName == split[split.length-1])) {
-                trace("LJ Arcade Specific State Found!");
+            || (Type.getClass(FlxG.game._requestedState) == ModState) && (FlxG.game._requestedState.lastName == split[split.length-1])) {
 				FlxG.game._requestedState = new ModState(fileName);
                 return;
             }
