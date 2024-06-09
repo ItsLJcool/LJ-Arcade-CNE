@@ -1,8 +1,9 @@
 //a
 
+
 var fade:FlxSprite;
 var cam:FlxCamera;
-function create() {
+function new() {
     cam = new FlxCamera();
     cam.bgColor = 0;
     FlxG.cameras.add(cam, false);
@@ -11,6 +12,8 @@ function create() {
     fade.screenCenter();
     fade.alpha = 0.0001;
     add(fade);
+}
+function create() {
 
     intro();
 }
@@ -20,11 +23,20 @@ function update(elapsed) {
 }
 
 function _close() {
-    FlxTween.tween(fade, {alpha: 0}, 1, {ease: FlxEase.quadInOut, onComplete: close});
+    FlxTween.tween(fade, {alpha: 0}, 1, {ease: FlxEase.quadInOut, onComplete: function() {
+        for (item in [cam, fade]) {
+            item.kill();
+            item.destroy();
+            remove(item);
+        }
+        FlxG.cameras.remove(cam);
+
+        close();
+    }, });
 }
 
 function intro() {
-    FlxTween.tween(fade, {alpha: 1}, 1, {ease: FlxEase.quadInOut});
+    FlxTween.tween(fade, {alpha: 1}, 0.5, {ease: FlxEase.quadInOut});
 }
 
 function add(object) {

@@ -12,6 +12,7 @@ import funkin.backend.assets.ModsFolder;
 import Type;
 import funkin.backend.chart.EventsData;
 import flixel.FlxG;
+importScript('LJ Arcade API/challenges');
 
 static var queuedSubStates = [];
 
@@ -67,7 +68,12 @@ static function openQueuedSubState(state:FlxSubState, ?priority:Bool = false) {
 
 static function close() {
     if (FlxG.state.subState == null) return;
-    FlxG.state.closeSubState();
+    FlxG.state.closeSubState(); FlxG.state.subState.close();
+    
+    if (queuedSubStates[0] != null) {
+        var newSubState = queuedSubStates.shift();
+        FlxG.state.openSubState(newSubState);
+    }
 }
 
 function destroy() { FlxG.camera.bgColor = 0xFF000000; }
