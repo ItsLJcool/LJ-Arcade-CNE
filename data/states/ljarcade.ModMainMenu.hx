@@ -8,6 +8,9 @@ import flixel.text.FlxTextBorderStyle;
 import funkin.backend.shaders.CustomShader;
 import flixel.group.FlxTypedSpriteGroup;
 import flixel.math.FlxMath;
+
+import haxe.io.Path;
+import sys.FileSystem;
 importScript('LJ Arcade API/tokens');
 
 var ref;
@@ -21,22 +24,31 @@ var background:FlxTypedSpriteGroup;
 /**
     This will contian `Path.image` strings to the file.
 **/
-var typesOfBGs = [
-    Paths.image("MainMenu/bgs/arcadeBG")
-];
+var typesOfBGs = [];
 function create() {
+    initTokens();
+    var path = "MainMenu/bgs";
+    for (funnies in FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/images/"+path)) {
+        if (Path.extension(funnies) != "png") continue;
+        funnies = Path.withoutExtension(funnies);
+        typesOfBGs.push(Paths.image(path+"/"+funnies));
+    }
+    // TODO: In LJ Arcade folder in the mod your in, add those images as well
+    // and they can toggle priority on or off, or just disable default and only have mod specific.
+
     FlxG.mouse.visible = true;
     FlxG.camera.bgColor = 0xFF808080;
 
     background = new FlxTypedSpriteGroup();
     add(background);
-    var newRandomBG = FlxG.random.int(0, typesOfBGs.length-1);
+    currentBgID = FlxG.random.int(0, typesOfBGs.length-1);
     for (idx in 0...typesOfBGs.length) {
         var bgs = typesOfBGs[idx];
         var bg = new FlxSprite(0,0, bgs);
+        bg.ID = idx;
         bg.setGraphicSize(FlxG.width, FlxG.height);
         bg.screenCenter();
-        bg.alpha = (newRandomBG == idx) ? 1 : 0.0001;
+        bg.alpha = (currentBgID == idx) ? 1 : 0.0001;
         background.add(bg);
     }
     cycleBg();
@@ -167,8 +179,35 @@ function bottomShit() {
     add(optionText);
 }
 
-function cycleBg() {
-    // TODO: Add custom background cycling lol
+var cycleTimer:FlxTimer = new FlxTimer();
+/**
+    @param time [Int] - `Default: 15s` | how fast the background cycles, calling it will reset its current timer and start new.
+**/
+var currentBgID = 0;
+function cycleBg(?time:Int = 15) {
+    if (time == null) time = 15;
+    
+    var cancelNextCycle = false;
+    if (cycleTimer.active) {
+        cycleTimer.cancel();
+        cancelNextCycle = true;
+        cycleBg(time);
+        return;
+    }
+
+    cycleTimer.start(time, function(tmr) {
+        if (typesOfBGs.length == 1) return;
+        var newBgId = FlxG.random.int(0, typesOfBGs.length-1, [currentBgID]);
+        var spr = background.members[newBgId]; // backup in case it doesn't set
+        background.forEach(function(bg) { if (bg.ID == newBgId) spr = bg; });
+        background.remove(spr, true);
+        background.add(spr);
+        FlxTween.tween(spr, {alpha: 1}, 1.5, {ease: FlxEase.quadInOut, onComplete: function() {
+            background.forEach(function(bg) { if (bg.ID == currentBgID) bg.alpha = 0.0001; });
+            if (!cancelNextCycle) cycleBg(time);
+            currentBgID = newBgId;
+        }});
+    });
 }
 
 var selectItems:FlxTypedSpriteGroup;

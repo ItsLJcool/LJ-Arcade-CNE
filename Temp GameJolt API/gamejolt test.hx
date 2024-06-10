@@ -10,7 +10,7 @@ import funkin.backend.system.Main;
 
 import funkin.backend.assets.ModsFolder;
 
-public function getGameJoltName() { return Base64.decode(Assets.getText(Paths.getPath("GameJolt API/TOKEN"))).toString(); }
+public function getGameJoltName() { return Base64.decode(Assets.getText(Paths.getPath("Temp GameJolt API/TOKEN"))).toString(); }
 
 public var GameJolt = {
 	http: new Http(''),
@@ -18,8 +18,11 @@ public var GameJolt = {
 	privateKey: getGameJoltName(),
 
 	username: 'ItsLJcool',
-	token: 'DxQYfX',
-
+	token: 'DxQYfX', // dont try shit lmao, this is being refreshed when i make source public. Losor!!
+	/**
+		@param endpoint [String] - The API Endpoint you are trying to fetch, example: `users`
+		@param params `{name:String, value:String}` - Data you are sending for the API to recieve. Example: `{name: "username", value: "ItsLJcool"}`
+	**/
 	get: function(endpoint:String, params:Array<{name:String, value:String}>) {
 		var url:String = 'https://api.gamejolt.com/api/game/v1_2/' + endpoint + '/?game_id=' + GameJolt.id;
 		for (i in params)
@@ -43,7 +46,19 @@ public var GameJolt = {
 	},
 
 	setSave: function(key:String, save) { return GameJolt.set("data-store/set", [{name: "key", value: key}, {name: "data", value: save }]); },
+	setUserSave: function(key:String, save) {
+		return GameJolt.set("data-store/set", [
+			{name: "key", value: key}, {name: "data", value: save },
+			{name: "username", value: GameJolt.username }, {name: "user_token", value: GameJolt.token }
+		]);
+	},
 	getSave: function(key:String) { return GameJolt.get("data-store", [{name: "key", value: key}]); },
+	getUserSave: function(key:String) {
+		return GameJolt.set("data-store", [
+			{name: "key", value: key},
+			{name: "username", value: GameJolt.username }, {name: "user_token", value: GameJolt.token }
+		]);
+	},
 
 	lastUnlockedTrophy: null,
 	unlockTrophy: function(trophyId) {
