@@ -12,9 +12,13 @@ import funkin.backend.assets.ModsFolder;
 import Type;
 import funkin.backend.chart.EventsData;
 import flixel.FlxG;
+import lime.utils.AssetLibrary;
+
 importScript('LJ Arcade API/challenges');
 
 static var queuedSubStates = [];
+
+static var _loadedModAssetLibrary:Map<String, AssetLibrary> = [];
 
 
 static var initialized:Bool = false;
@@ -32,6 +36,10 @@ function preStateSwitch() {
     if (FlxG.game._requestedState is PlayState) {
         trace("PlayState opening");
         EventsData.reloadEvents();
+    }
+
+    if (FlxG.game._requestedState is FreeplayState) {
+        FlxG.game._requestedState = new ModState("ModMainMenu");
     }
 	if (!initialized) {
 		initialized = true;
@@ -77,3 +85,39 @@ static function close() {
 }
 
 function destroy() { FlxG.camera.bgColor = 0xFF000000; }
+
+/**
+    Loads a song and sends player to PlayState
+**/
+static function loadAndPlaySong(songName:String, diff:String = "hard", opponentMode:Bool = false, coopMode:Bool = false) {
+    if (diff == null) diff = "hard";
+    if (opponentMode == null) opponentMode = false;
+    if (coopMode == null) coopMode = false;
+    PlayState.loadSong(songName, diff, opponentMode, coopMode);
+    FlxG.switchState(new PlayState());
+}
+/**
+    @param modToLoad - [String] - The folder name of the mod to load in your mods folder
+    returns true on success, false if not added (because it already is) or on error
+**/
+static function loadModToLibrary(modToLoad:String) {
+    for (mod in ModsFolder.getLoadedMods()) {
+        var modSplit = mod.split("/");
+        var actualMod = modSplit[modSplit.length-1];
+        if (actualMod.toLowerCase() == modToLoad.toLowerCase()) return false;
+    }
+    var modLoaded = Paths.assetsTree.addLibrary(ModsFolder.loadModLib(ModsFolder.modsPath+modToLoad, modToLoad));
+    _loadedModAssetLibrary.set(modToLoad, modLoaded);
+    return true;
+}
+
+/**
+    @param modToRemove - [String] - The folder name of the mod to remove from the `Paths.assetTree`
+    returns true on success, false if not added (because it isn't added yet) or on error
+**/
+static function removeModFromLibrary(modToRemove) {
+    if (!_loadedModAssetLibrary.exists(modToRemove)) return false;
+    Paths.assetsTree.removeLibrary(_loadedModAssetLibrary.get(modToRemove));
+    _loadedModAssetLibrary.remove(modToRemove);
+    return true;
+}

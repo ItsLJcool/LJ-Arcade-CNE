@@ -33,9 +33,6 @@ public function GameJoltToSave(gamejoltSave) {
 }
 
 public function initTokens() {
-    // var test = GameJolt.set("data-store/remove", [{name: "key", value: "levelSave"},
-    // {name: "username", value: GameJolt.username}, {name: "user_token", value: GameJolt.token }]);
-    // trace(test);
     
     var currentSave = GameJoltToSave(GameJolt.getUserSave("levelSave"));
     trace(currentSave);
@@ -62,4 +59,9 @@ public function updateSave(key:String, value:Dynamic) {
     var currentSave = GameJoltToSave(GameJolt.getUserSave("levelSave"));
     Reflect.setField(currentSave.data, key, value);
     GameJolt.setUserSave("levelSave", Json.stringify(currentSave.data));
+}
+
+function resetLevels() {
+    GameJolt.set("data-store/remove", [{name: "key", value: "levelSave"}, {name: "username", value: GameJolt.username}, {name: "user_token", value: GameJolt.token }]);
+    
 }
