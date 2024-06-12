@@ -50,7 +50,7 @@ function postStateSwitch() {
 
 static var modGlobalScript = null;
 static var _fromFreeplay:Bool = false;
-
+static var __customArgs:Array<Dynamic> = [];
 function preStateSwitch() {
     FlxG.camera.bgColor = 0xFF000000;
     

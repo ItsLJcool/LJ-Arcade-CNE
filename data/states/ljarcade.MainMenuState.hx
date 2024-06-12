@@ -1,6 +1,12 @@
 //a
+import funkin.backend.system.Controls;
+import funkin.backend.assets.ModsFolder;
+import funkin.menus.ModSwitchMenu;
 
-var modsInFolder:Array<String> = ["test1", "test 2", "test#3!"];
+import sys.FileSystem;
+import haxe.io.Path;
+
+var modsInFolder:Array<String> = [];
 
 var modCardSprite:FlxSprite;
 
@@ -13,6 +19,13 @@ var bgIconSpr:FlxSprite;
 
 var sideBoxes:Array<FlxSprite> = [];
 var arrow:FlxSprite;
+
+function new() {
+    for (item in FileSystem.readDirectory(ModsFolder.modsPath)) {
+        if (Path.extension(item) != "" || item == ModsFolder.currentModFolder) continue;
+        modsInFolder.push(item);
+    }
+}
 function create() {
     FlxG.mouse.visible = true;
     FlxG.camera.bgColor = 0xFF808080;
@@ -40,7 +53,7 @@ function create() {
     arcadeMachine.x = FlxG.width - arcadeMachine.width - 15;
     arcadeMachine.y = FlxG.height - arcadeMachine.height + 100;
     add(arcadeMachine);
-    arcadePlay("ad", 0.5);
+    arcadePlay("ad", 0.5, 2);
     
     iconSpr.setGraphicSize(375, 375);
     // iconSpr.scale.set(Math.min(iconSpr.scale.x, iconSpr.scale.y), Math.min(iconSpr.scale.x, iconSpr.scale.y));
@@ -92,29 +105,32 @@ function create() {
     add(arrow);
 }
 
-function arcadePlay(anim, timeTransition:Int = 0.5) {
+function arcadePlay(anim, timeTransition:Int = 0.5, other:Int = 0.5) {
     if (timeTransition == null) timeTransition = 0.5;
+    if (other == null) other = 0.5;
     if (arcadeMachine.animation.name != "transition") arcadeMachine.animation.play("transition", true);
     new FlxTimer().start(timeTransition, function(tmr) {
         switch(anim) {
             case "ad", 0:
                 arcadeMachine.animation.play("ad", true);
-                new FlxTimer().start(1, function(tmr) { arcadePlay("mod"); });
+                new FlxTimer().start(other, function(tmr) { arcadePlay("mod"); });
             case "mod", 1: arcadeMachine.animation.play("shell", true);
         }
     });
 }
 
 
+var prevSel:Int = 0;
 var curSel:Int = 0;
 var enteringMod:Bool = false;
 
 
 var selectionTimer:FlxTimer = new FlxTimer();
+var hoveringOverSelTimer:FlxTimer = new FlxTimer();
 function changeSelected(hur:Int = 0) {
     if (enteringMod || selectionTimer.active) return;
     
-    selectionTimer.start(0.2);
+    selectionTimer.start(0.15);
     
     curSel += hur;
     if (curSel >= modsInFolder.length) curSel = 0;
@@ -130,6 +146,23 @@ function changeSelected(hur:Int = 0) {
         _cachePos.insert(0, lastPos);
     }
     
+    prevSel = curSel;
+    hoveringOverSelTimer.start(1, hoveringOverSelectedMod);
+}
+
+function enterModState() {
+    if (enteringMod && modsInFolder.length < 1) return;
+    enteringMod = true;
+    
+    trace(modsInFolder[curSel]);
+    __customArgs = [modsInFolder[curSel]];
+    FlxG.switchState(new ModState("ModMainMenu"));
+}
+
+function hoveringOverSelectedMod(tmr:FlxTimer) {
+    if (prevSel != curSel) return;
+    
+    arcadePlay("mod");
 }
 
 var _songItems:Int = 11;
@@ -139,7 +172,7 @@ var arcScale = 650;
 var offsetPosX = 725;
 
 var _songCenter:Int = Math.floor(_songItems * 0.5);
-var _cachePos:Array<{x:Float, y:Float}> = [for (i in 0..._songItems) {x: (offsetPosX-250) + (arcScale * Math.cos(angleStep * (i+0.3))), y: (FlxG.height * 0.5) - (150*1.25) * (i - _songCenter), alpha: 1}];
+var _cachePos:Array<{x:Float, y:Float}> = [for (i in 0..._songItems) {x: (offsetPosX-250) + (arcScale * Math.cos(angleStep * (i+0.3))), y: (FlxG.height * 0.5) - (150*1.25) * (i - _songCenter) + 100, alpha: 1}];
 function cardUpdate(sprite:FlxSprite) {
     for (i in 0..._songItems) {
         var songItem = (i - _songCenter) + curSel;
@@ -151,26 +184,35 @@ function cardUpdate(sprite:FlxSprite) {
 
         var elapsedTime = FlxG.elapsed * 15;
         _cachePos[i].x = FlxMath.lerp(_cachePos[i].x, offsetPosX + xPos, FlxG.elapsed * 8);
-        _cachePos[i].y = FlxMath.lerp(_cachePos[i].y, (FlxG.height * 0.5) - (modCardSprite.height*1.25) * (i - _songCenter), FlxG.elapsed * 4);
+        _cachePos[i].y = FlxMath.lerp(_cachePos[i].y, (FlxG.height * 0.5) - (modCardSprite.height*1.1) * (i - _songCenter) + 100, FlxG.elapsed * 8);
         
         sprite.x = _cachePos[i].x;
         sprite.y = _cachePos[i].y;
 
-        modNames[i].x = _cachePos[i].x;
-        modNames[i].y = _cachePos[i].y;
+        modNames[i].scale.x = Math.min((sprite.width - 15) / modNames[i].frameWidth, 1);
+        modNames[i].updateHitbox();
+        modNames[i].x = _cachePos[i].x + sprite.width * 0.5 - modNames[i].width * 0.5;
+        modNames[i].y = _cachePos[i].y + sprite.height * 0.5 - modNames[i].height * 0.5;
+        modNames[i].text = modsInFolder[songItem];
 
         sprite.draw();
     }
 }
 
 function update(elapsed) {
+    if (controls.SWITCHMOD) {
+        openSubState(new ModSwitchMenu());
+        persistentUpdate = false;
+        persistentDraw = true;
+    }
+
     if (FlxG.mouse.overlaps(arrow)) {
         if (FlxG.mouse.justPressed) doFunnyTest();
         var sinFunc = 0.45 + (Math.sin(Conductor.songPosition / 175) * 0.35);
         arrow.alpha = FlxMath.lerp(arrow.alpha, sinFunc, elapsed*10);
     } else arrow.alpha = FlxMath.lerp(arrow.alpha, 1, elapsed*10);
 
-    if (FlxG.keys.justPressed.L) FlxG.switchState(new ModState("ModMainMenu"));
+    if (controls.ACCEPT) enterModState();
 
     if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP) {
         changeSelected(1);

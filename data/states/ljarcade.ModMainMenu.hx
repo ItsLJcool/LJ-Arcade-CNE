@@ -43,10 +43,12 @@ var typesOfBGs = [];
 var currentState = (_fromFreeplay) ? 1 : 0;
 
 var soon:FlxText;
+var args = __customArgs;
+function new() {
+    loadModToLibrary(args[0]); // testing, remove when done
+}
+
 function create() {
-    loadModToLibrary("YTP"); // testing, remove when done
-
-
     initTokens();
     var path = "ModMenu/bgs";
     for (funnies in FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/images/"+path)) {
@@ -118,11 +120,7 @@ function update(elapsed) {
         switch(currentState) {
             case 1: toMainMenu();
             default:
-                // temp, but we remove mod from lib when leaving this state
-                removeModFromLibrary("YTP");
-                removeModFromLibrary("Treeshot-Funkin");
-                removeModFromLibrary("Vs Bam");
-
+                removeModFromLibrary(args[0]); // testing, remove when done
                 FlxG.switchState(new MainMenuState());
         }
     }
@@ -522,20 +520,19 @@ function updateSongTab(sprite:FlxSprite) {
         songIcons[i].x = _cachePos[i].x + songTab.width - 125;
         songIcons[i].y = _cachePos[i].y + songTab.height * 0.25 - songIcons[i].height * 0.25;
 
+        songNames[i].scale.x = Math.min((songTab.width - 200) / songNames[i].frameWidth, 1);
+        songNames[i].updateHitbox();
         songNames[i].x = FlxMath.lerp(songNames[i].x, (currentState == 1) ? 25 : xPos, elapsedTime);
         songNames[i].y = _cachePos[i].y + songTab.height * 0.5 - songNames[i].height * 0.5;
         songNames[i].text = (songs[songItem].displayName != null) ? songs[songItem].displayName : songs[songItem].name;
-        songNames[i].scale.x = Math.min((songTab.width - 200) / songNames[i].frameWidth, 1);
-        songNames[i].updateHitbox();
 
-        // this goes LAST!! in the for loop
         sprite.color = songs[songItem].parsedColor;
-
         if (freeplayEntering) {
             _cachePos[i].alpha = FlxMath.lerp(_cachePos[i].alpha, (i == _songCenter) ? 1 : 0.45, elapsedTime);
             sprite.alpha = songIcons[i].alpha = _cachePos[i].alpha;
             
         }
+        // this goes LAST!! in the for loop
         sprite.draw();
     }
 }
