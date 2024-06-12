@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="arcadebox.png">
+	<!-- Created with Adobe Animate version 21.0.6.41649 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="ADVERTISEMENT0000" x="0" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0001" x="909" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0002" x="0" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0003" x="909" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0004" x="0" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0005" x="909" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0006" x="0" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0007" x="909" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0008" x="0" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0009" x="909" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0010" x="1818" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0011" x="2727" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0012" x="1818" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0013" x="2727" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0014" x="1818" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0015" x="2727" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0016" x="1818" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0017" x="2727" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0018" x="1818" y="0" width="909" height="991"/>
+	<SubTexture name="ADVERTISEMENT0019" x="2727" y="0" width="909" height="991"/>
+	<SubTexture name="ARCADESHELL0000" x="0" y="991" width="909" height="991"/>
+	<SubTexture name="ARCADETRANSITION0000" x="909" y="991" width="909" height="991"/>
+	<SubTexture name="ARCADETRANSITION0001" x="1818" y="991" width="909" height="991"/>
+	<SubTexture name="ARCADETRANSITION0002" x="2727" y="991" width="909" height="991"/>
+	<SubTexture name="ARCADETRANSITION0003" x="0" y="1982" width="909" height="991"/>
+	<SubTexture name="ARCADETRANSITION0004" x="909" y="1982" width="909" height="991"/>
+</TextureAtlas>

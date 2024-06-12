@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="arrowanim.png">
+	<!-- Created with Adobe Animate version 21.0.6.41649 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="arrowanim instance 10000" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10001" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10002" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10003" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10004" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10005" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10006" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10007" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10008" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10009" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10010" x="130" y="0" width="80" height="496" frameX="0" frameY="-27" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10011" x="130" y="0" width="80" height="496" frameX="0" frameY="-27" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10012" x="210" y="0" width="62" height="549" frameX="-14" frameY="0" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10013" x="210" y="0" width="62" height="549" frameX="-14" frameY="0" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10014" x="272" y="0" width="65" height="505" frameX="-4" frameY="-22" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10015" x="337" y="0" width="65" height="506" frameX="-4" frameY="-22" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10016" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10017" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10018" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10019" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10020" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10021" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10022" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10023" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10024" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10025" x="65" y="0" width="65" height="518" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10026" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10027" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10028" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+	<SubTexture name="arrowanim instance 10029" x="0" y="0" width="65" height="517" frameX="-8" frameY="-16" frameWidth="80" frameHeight="549"/>
+</TextureAtlas>

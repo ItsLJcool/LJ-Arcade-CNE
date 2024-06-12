@@ -14,6 +14,20 @@ import funkin.backend.chart.EventsData;
 import flixel.FlxG;
 import lime.utils.AssetLibrary;
 
+import funkin.backend.scripting.GlobalScript;
+
+import funkin.backend.scripting.Script;
+import funkin.backend.scripting.ScriptPack;
+import funkin.backend.scripting.DummyScript;
+import funkin.backend.scripting.HScript;
+
+import funkin.backend.system.Logs;
+import funkin.backend.system.Level;
+
+import flixel.system.scaleModes.RatioScaleMode;
+import openfl.system.Capabilities;
+import funkin.backend.utils.WindowUtils;
+
 importScript('LJ Arcade API/challenges');
 
 static var queuedSubStates = [];
@@ -30,17 +44,37 @@ static var redirectStates:Map<FlxState, String> = [
 	// FreeplayState => 'you already know it dumbass'
 ];
 
+function postStateSwitch() {
+    _fromFreeplay = false;
+}
+
+static var modGlobalScript = null;
+static var _fromFreeplay:Bool = false;
+
 function preStateSwitch() {
     FlxG.camera.bgColor = 0xFF000000;
     
     if (FlxG.game._requestedState is PlayState) {
-        trace("PlayState opening");
         EventsData.reloadEvents();
+
+        // reset globalscript and then we can saftely import a .. undefiend global script?? so what evor
+        GlobalScript.onModSwitch(ModsFolder.currentModFolder);
+        modGlobalScript = GlobalScript.scripts.importScript("data/global.hx");
+        modGlobalScript.set("preStateSwitch", function() {}); // hehe
+    } else {
+        window.frameRate = Options.framerate;
+        if (modGlobalScript != null) {
+            GlobalScript.onModSwitch(ModsFolder.currentModFolder);
+            
+            modGlobalScript = null;
+        }
     }
 
     if (FlxG.game._requestedState is FreeplayState) {
+        _fromFreeplay = true;
         FlxG.game._requestedState = new ModState("ModMainMenu");
     }
+
 	if (!initialized) {
 		initialized = true;
 		//FlxG.game._requestedState = new ModState('WarningState');
@@ -75,8 +109,8 @@ static function openQueuedSubState(state:FlxSubState, ?priority:Bool = false) {
 }
 
 static function close() {
+    trace(FlxG.game._requestedState);
     if (FlxG.state.subState == null) return;
-    FlxG.state.closeSubState(); FlxG.state.subState.close();
     
     if (queuedSubStates[0] != null) {
         var newSubState = queuedSubStates.shift();

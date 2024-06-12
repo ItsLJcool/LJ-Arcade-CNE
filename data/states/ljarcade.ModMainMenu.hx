@@ -19,10 +19,12 @@ import funkin.menus.FreeplaySonglist;
 
 import sys.FileSystem;
 import funkin.backend.chart.Chart;
+import funkin.backend.utils.WindowUtils;
 
 
 import StringTools;
 import Type;
+import Sys;
 importScript('LJ Arcade API/tokens');
 
 var ref;
@@ -38,14 +40,15 @@ var background:FlxTypedSpriteGroup;
 **/
 var typesOfBGs = [];
 
-var currentState = 0;
+var currentState = (_fromFreeplay) ? 1 : 0;
+
+var soon:FlxText;
 function create() {
-    
-    loadModToLibrary("Treeshot-Funkin"); // testing, remove when done
+    loadModToLibrary("YTP"); // testing, remove when done
 
 
     initTokens();
-    var path = "MainMenu/bgs";
+    var path = "ModMenu/bgs";
     for (funnies in FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/images/"+path)) {
         if (Path.extension(funnies) != "png") continue;
         funnies = Path.withoutExtension(funnies);
@@ -78,6 +81,16 @@ function create() {
     
     stateDisplay();
     levelArt();
+
+    soon = new FlxText(0,0, FlxG.width/2 + 200, "Damn, its not ready yet...\n\nwait how did you get here?..\n\nimagine hacking the game (editing hscript)");
+    soon.setFormat(Paths.font("goodbyeDespair.ttf"), 32, 0xFFFFFFFF, "center", FlxTextBorderStyle.SHADOW, 0xFF000000);
+    soon.borderSize = 2;
+    soon.shadowOffset.x = 0;
+    soon.shadowOffset.y = 3;
+    soon.screenCenter();
+    soon.alpha = 0.0001;
+    add(soon);
+
     
     ref = new FlxSprite(0,0, Paths.image("References/mainMenuStateV2"));
     ref.setGraphicSize(FlxG.width, FlxG.height);
@@ -87,6 +100,7 @@ function create() {
 }
 
 function update(elapsed) {
+    
     if (FlxG.mouse.overlaps(optionIcon)) {
         var sinFunc = 0.75 + (Math.sin(Conductor.songPosition / 175) * 0.25);
         optionIcon.scale.x = optionIcon.scale.y = FlxMath.lerp(optionIcon.scale.x, 1.2, elapsed*10);
@@ -100,43 +114,44 @@ function update(elapsed) {
     if (FlxG.keys.justPressed.P) ref.alpha += 0.1;
     if (FlxG.keys.justPressed.O) ref.alpha -= 0.1;
 
-    if (FlxG.keys.justPressed.ESCAPE) FlxG.switchState(new MainMenuState());
+    if (FlxG.keys.justPressed.ESCAPE) {
+        switch(currentState) {
+            case 1: toMainMenu();
+            default:
+                // temp, but we remove mod from lib when leaving this state
+                removeModFromLibrary("YTP");
+                removeModFromLibrary("Treeshot-Funkin");
+                removeModFromLibrary("Vs Bam");
+
+                FlxG.switchState(new MainMenuState());
+        }
+    }
 
     if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP) {
         switch(currentState) {
             case 1: changeFreeplaySelected(-1);
-            default: 
-                changeMainMenuSelected(-1);
+            default: changeMainMenuSelected(-1);
         }
     }
     if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.DOWN) {
         switch(currentState) {
             case 1: changeFreeplaySelected(1);
-            default: 
-                changeMainMenuSelected(1);
+            default: changeMainMenuSelected(1);
         }
     }
 
     if (FlxG.keys.justPressed.ENTER) {
         switch(currentState) {
             case 1: enterFreeplaySong();
-            default: 
-                // changeMainMenuSelected(1);
+            default: enterMainMenu();
         }
     }
 
-    if (FlxG.keys.justPressed.T) {
-        currentState = (currentState == 0) ? 1 : 0;
-    }
-
-    if (FlxG.keys.justPressed.G) {
-        removeModFromLibrary("Treeshot-Funkin");
-    }
     if (FlxG.keys.justPressed.R) ModsFolder.reloadMods();
 
 }
 
-// lj is blue
+// lj is blue // srt grrr
 
 var sectionTitle:FlxText;
 var currentModText:FlxText;
@@ -222,7 +237,7 @@ function bottomShit() {
     selectOption.setPosition(25, bottomBar.y + bottomBar.height/2 - selectOption.height/2);
     add(selectOption);
 
-    optionIcon = new FlxSprite(0,0, Paths.image("MainMenu/optionsIcon"));
+    optionIcon = new FlxSprite(0,0, Paths.image("ModMenu/optionsIcon"));
     optionIcon.setPosition(FlxG.width - optionIcon.width - 15, bottomBar.y + bottomBar.height/2 - optionIcon.height/2);
     add(optionIcon);
 
@@ -268,7 +283,6 @@ var selectItems:FlxTypedSpriteGroup;
 var selectableNames = [
     "Freeplay", "Challenges", "Shop"
 ];
-
 function menuShit() {
     selectItems = new FlxTypedSpriteGroup();
     add(selectItems);
@@ -276,52 +290,88 @@ function menuShit() {
     for (idx in 0...selectableNames.length) {
         var name = selectableNames[idx];
         
-        var text = new FlxSprite(0,0, Paths.image("MainMenu/"+name));
+        var text = new FlxSprite(0,0, Paths.image("ModMenu/"+name));
+        text.ID = idx;
         text.scale.set(0.75, 0.75);
         text.updateHitbox();
         text.x = FlxG.width - text.width - 25;
         text.y = 150*(idx+1);
         selectItems.add(text);
     }
+    if (currentState != 0) selectItems.forEach(function(item) { item.x = FlxG.width + 500; });
     changeMainMenuSelected(0);
 }
 
 var curSel:Int = 0;
 var inactive:Array<Bool> = [false, true, true];
 function changeMainMenuSelected(hur:Int = 0) {
+    if (enteringMenu) return;
+    curSel += hur;
     if (curSel >= selectableNames.length) curSel = selectableNames.length-1;
     if (curSel < 0) curSel = 0;
 
     selectItems.forEach(function(item) {
-        // if (inactive[item.ID]) {
-        //     item.colorTransform.redMultiplier = 0;
-        //     item.colorTransform.greenMultiplier = 0;
-        //     item.colorTransform.blueMultiplier = 0;
-        //     return;
-        // }
-        // if (item.ID == curSel) {
-        //     item.colorTransform.redMultiplier = 0.25;
-        //     item.colorTransform.greenMultiplier = 0.5;
-        //     item.colorTransform.blueMultiplier = 0.25;
-        // } else {
-        //     item.colorTransform.redMultiplier = 1;
-        //     item.colorTransform.greenMultiplier = 1;
-        //     item.colorTransform.blueMultiplier = 1;
-        // }
-        item.setColorTransform(0.25, 0.5, 0.25);
+        if (inactive[item.ID]) {
+            if (item.ID == curSel) item.setColorTransform(0.5, 0.75, 0.5);
+            else item.setColorTransform(0.5, 0.5, 0.5);
+            return;
+        }
+        if (item.ID == curSel) item.setColorTransform(0.25, 1, 0.25);
+        else item.setColorTransform(1, 1, 1);
+    });
+}
+
+function toMainMenu() {
+    currentState = 0;
+        
+    enteringMenu = false;
+    changeMainMenuSelected(0);
+    enteringMenu = true;
+    selectItems.forEach(function(item) {
+        FlxTween.tween(item, {x: FlxG.width - item.width - 25}, 1, {ease: FlxEase.quadOut, startDelay: 0.1 * (1 - item.ID), onComplete: function() {
+            if (item.ID != selectItems.members.length-1) return;
+            enteringMenu = false;
+        }});
+    });
+}
+
+var enteringMenu:Bool = false;
+function enterMainMenu() {
+    if (enteringMenu || inactive[curSel]) return;
+    CoolUtil.playMenuSFX(1);
+
+    enteringMenu = true;
+    var item = selectItems.members[curSel];
+    new FlxTimer().start(0.075, function(tmr) {
+        item.colorTransform.redMultiplier = (tmr.loopsLeft % 2 == 0) ? 1 : 0.25;
+        item.colorTransform.blueMultiplier = (tmr.loopsLeft % 2 == 0) ? 1 : 0.25;
+
+        if (tmr.loopsLeft != 0) return;
+        
+        selectItems.forEach(function(item) {
+            FlxTween.tween(item, {x: FlxG.width + 500}, 1, {ease: FlxEase.quadIn, startDelay: 0.1 * (item.ID + 1), onComplete: function() {
+                if (item.ID != selectItems.members.length-1) return;
+                currentState = (curSel+1);
+                endMenuAnimation();
+            }});
+        });
+    }, 10);
+}
+
+function endMenuAnimation() {
+    if (!inactive[curSel] && selectableNames[curSel].toLowerCase() == "freeplay") return;
+
+    FlxTween.tween(soon, {alpha: 1}, 1, {ease: FlxEase.quadInOut});
+    new FlxTimer().start(4.5, function() {
+        soon.text += "\n\nyou know what fuck you, get fucked idiot!!!11!!!";
+        soon.screenCenter();
+        new FlxTimer().start(1, function() { Sys.exit(0); });
     });
 }
 
 var freeplaySel:Int = 0;
 function changeFreeplaySelected(hur:Int = 0) {
     if (freeplayEntering) return;
-
-    shineTimer.cancel();
-    songSlideThingy.alpha = 0.0001;
-    shineTimer.start(0.5, function() {
-        songSlideThingy.alpha = 1;
-        songSlideThingy.animation.play("idle", true);
-    });
     freeplaySel += hur;
     if (freeplaySel >= songs.length) freeplaySel = 0;
     if (freeplaySel < 0) freeplaySel = songs.length-1;
@@ -335,6 +385,32 @@ function changeFreeplaySelected(hur:Int = 0) {
         lastPos.y = _cachePos[0].y - 100;
         _cachePos.insert(0, lastPos);
     }
+
+    for (i in 0..._songItems) {
+        var songItem = (i - _songCenter) + freeplaySel;
+        songItem = ((songItem % songs.length) + songs.length) % songs.length; // this should be a positive modulo.
+
+        songIcons[i].setIcon(songs[songItem].icon);
+        songIcons[i].updateHitbox();
+        if (songs[songItem].icon == "face" || !Assets.exists(Paths.image("icons/"+songs[songItem].icon))) {
+            songIcons[i].offset.x = 20;
+            songIcons[i].offset.y -= 2;
+        }
+    }
+
+    var color = songs[freeplaySel].parsedColor;
+    var maxColor = Math.max((color >> 16) & 0xFF, Math.max((color >> 8) & 0xFF, color & 0xFF));
+    var minColor = Math.min((color >> 16) & 0xFF, Math.min((color >> 8) & 0xFF, color & 0xFF));
+    var lightness = (maxColor - minColor) * 0.5;
+    var nuhUh = (lightness) * 2;
+    songSlideThingy.setColorTransform(nuhUh, nuhUh, nuhUh);
+    
+    shineTimer.cancel();
+    songSlideThingy.alpha = 0.0001;
+    shineTimer.start(0.5, function() {
+        songSlideThingy.alpha = 0.6;
+        songSlideThingy.animation.play("idle", true);
+    });
 }
 
 var freeplayEntering:Bool = false;
@@ -345,7 +421,7 @@ function enterFreeplaySong() {
     freeplayEntering = true;
 
     freeplayAnimTimer.start(2.5, function(tmr) {
-        loadAndPlaySong(songs[freeplaySel].name, "hard");
+        loadAndPlaySong(songs[freeplaySel].name, "normal");
     });
     for (idx in 0...songNames.length) {
         var spr = songNames[idx];
@@ -353,16 +429,15 @@ function enterFreeplaySong() {
     }
 }
 
-var songs = [];
-
 var songTab:FlxSprite;
 var songSlideThingy:FlxSprite;
 var songNames:Array<FlxText> = [];
 var songIcons:Array<HealthIcon> = [];
 
 var shineTimer:FlxTimer = new FlxTimer();
+
+var songs = [];
 function freeplayShit() {
-    
     for (test in _loadedModAssetLibrary) { // just for support ig
         for (s in FileSystem.readDirectory(test.getPath("assets/songs"))) {
             if (Path.extension(s) != "") continue;
@@ -381,13 +456,14 @@ function freeplayShit() {
     songSlideThingy.frames = Paths.getSparrowAtlas("Freeplay/shineLoop");
     songSlideThingy.animation.addByPrefix("idle", "shineLoop", 24, false);
     songSlideThingy.animation.play("idle", true);
-    songSlideThingy.color = 0x13CCCCCC;
+    songSlideThingy.color = 0xFFFFFFFF;
+    
     songSlideThingy.scale.set(1.25, 1.25);
     songSlideThingy.updateHitbox();
     songSlideThingy.animation.finishCallback = function() {
         songSlideThingy.alpha = 0.0001;
         shineTimer.start(0.5, function() {
-            songSlideThingy.alpha = 1;
+            songSlideThingy.alpha = 0.6;
             songSlideThingy.animation.play("idle", true);
         });
     }
@@ -405,8 +481,10 @@ function freeplayShit() {
         var icon = new HealthIcon(data.icon);
         icon.scale.set(0.65, 0.65);
         icon.updateHitbox();
-        icon.offset.x = -5;
-        icon.offset.y -= 6;
+        if (data.icon == "face" || !Assets.exists(Paths.image("icons/"+data.icon))) {
+            icon.offset.x = 20;
+            icon.offset.y -= 2;
+        }
         songIcons.push(icon);
         add(icon);
     }
@@ -442,7 +520,7 @@ function updateSongTab(sprite:FlxSprite) {
         }
 
         songIcons[i].x = _cachePos[i].x + songTab.width - 125;
-        songIcons[i].y = _cachePos[i].y + songTab.height * 0.5 - songIcons[i].height * 0.5;
+        songIcons[i].y = _cachePos[i].y + songTab.height * 0.25 - songIcons[i].height * 0.25;
 
         songNames[i].x = FlxMath.lerp(songNames[i].x, (currentState == 1) ? 25 : xPos, elapsedTime);
         songNames[i].y = _cachePos[i].y + songTab.height * 0.5 - songNames[i].height * 0.5;
