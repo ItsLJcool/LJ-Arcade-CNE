@@ -65,7 +65,3 @@
 // 	FlxG.game._requestedState = newState;
 // 	FlxG.game.switchState();
 // }
-
-if (FlxG.game._requestedState is PlayState) {
-    importScript("data/states/MusicBeatTransition");
-}

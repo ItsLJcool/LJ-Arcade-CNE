@@ -25,6 +25,7 @@ import funkin.backend.utils.WindowUtils;
 import StringTools;
 import Type;
 import Sys;
+import funkin.options.OptionsMenu;
 importScript('LJ Arcade API/tokens');
 
 var ref;
@@ -101,9 +102,14 @@ function create() {
     add(ref);
 }
 
+function postCreate() {
+    changeDifficulty(0);
+}
+
 function update(elapsed) {
     
     if (FlxG.mouse.overlaps(optionIcon)) {
+        if (FlxG.mouse.justPressed) FlxG.switchState(new OptionsMenu());
         var sinFunc = 0.75 + (Math.sin(Conductor.songPosition / 175) * 0.25);
         optionIcon.scale.x = optionIcon.scale.y = FlxMath.lerp(optionIcon.scale.x, 1.2, elapsed*10);
         optionIcon.alpha = FlxMath.lerp(optionIcon.alpha, sinFunc, elapsed*10);
@@ -120,11 +126,23 @@ function update(elapsed) {
         switch(currentState) {
             case 1: toMainMenu();
             default:
+                lastSelectedFreeplaySong = null;
                 removeModFromLibrary(args[0]); // testing, remove when done
                 FlxG.switchState(new MainMenuState());
         }
     }
-
+    
+    if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT) {
+        switch(currentState) {
+            case 1: changeDifficulty(1);
+        }
+    }
+    if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT) {
+        switch(currentState) {
+            case 1: changeDifficulty(-1);
+        }
+    }
+    
     if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP) {
         switch(currentState) {
             case 1: changeFreeplaySelected(-1);
@@ -210,8 +228,11 @@ var glowShader:CustomShader;
 var selectOption:FlxText;
 var optionText:FlxText;
 var optionIcon:FlxSprite;
+
+var diffSelecter:FlxText;
+var arrowSelectors:Array<FlxSprite> = [];
 function bottomShit() {
-    glowShader = new CustomShader("glow");
+    glowShader = new CustomShader("ljarcade.glow");
 
     bottomBar = new FlxSprite().makeGraphic(FlxG.width, 85, 0xFF000000);
     bottomBar.alpha = 0.8;
@@ -243,6 +264,23 @@ function bottomShit() {
     optionText.setFormat(Paths.font("goodbyeDespair.ttf"), 36, 0xFFFFFFFF, "right");
     optionText.setPosition(optionIcon.x - optionText.width - 20, bottomBar.y + bottomBar.height/2 - optionText.height/2);
     add(optionText);
+
+    diffSelecter = new FlxText(0,0, 0, "normal");
+    diffSelecter.setFormat(Paths.font("goodbyeDespair.ttf"), 36, 0xFFFFFFFF, "center");
+    diffSelecter.setPosition(FlxG.width/2 - diffSelecter.width/2, bottomBar.y + bottomBar.height/2 - diffSelecter.height/2);
+    diffSelecter.alpha = (currentState == 1) ? 1 : 0.0001;
+    add(diffSelecter);
+
+    for (i in 0...2) {
+        var spr = new FlxSprite(0,0, Paths.image("Freeplay/ArrowThingie"));
+        spr.flipX = (i == 0);
+        spr.scale.set(0.8, 0.8);
+        spr.updateHitbox();
+        var x = (i > 0) ? diffSelecter.x - spr.width : diffSelecter.x + diffSelecter.width;
+        spr.setPosition(x, bottomBar.y + bottomBar.height/2 - spr.height/2);
+        add(spr);
+        arrowSelectors.push(spr);
+    }
 }
 
 var cycleTimer:FlxTimer = new FlxTimer();
@@ -277,10 +315,10 @@ function cycleBg(?time:Int = 15) {
 }
 
 var selectItems:FlxTypedSpriteGroup;
-
 var selectableNames = [
     "Freeplay", "Challenges", "Shop"
 ];
+
 function menuShit() {
     selectItems = new FlxTypedSpriteGroup();
     add(selectItems);
@@ -331,6 +369,7 @@ function toMainMenu() {
             enteringMenu = false;
         }});
     });
+    FlxTween.tween(diffSelecter, {alpha: 0.0001}, 0.75, {ease:FlxEase.quadInOut});
 }
 
 var enteringMenu:Bool = false;
@@ -357,7 +396,12 @@ function enterMainMenu() {
 }
 
 function endMenuAnimation() {
-    if (!inactive[curSel] && selectableNames[curSel].toLowerCase() == "freeplay") return;
+    switch(selectableNames[curSel].toLowerCase()) {
+        case "freeplay":
+            FlxTween.tween(diffSelecter, {alpha: 1}, 0.75, {ease:FlxEase.quadInOut});
+            return;   
+    }
+    if (!inactive[curSel]) return;
 
     FlxTween.tween(soon, {alpha: 1}, 1, {ease: FlxEase.quadInOut});
     new FlxTimer().start(4.5, function() {
@@ -367,7 +411,7 @@ function endMenuAnimation() {
     });
 }
 
-var freeplaySel:Int = 0;
+var freeplaySel:Int = (lastSelectedFreeplaySong == null) ? 0 : lastSelectedFreeplaySong;
 function changeFreeplaySelected(hur:Int = 0) {
     if (freeplayEntering) return;
     freeplaySel += hur;
@@ -411,15 +455,43 @@ function changeFreeplaySelected(hur:Int = 0) {
     });
 }
 
+var diffSel:Int = 0;
+function changeDifficulty(hur:Int = 0) {
+    if (freeplayEntering) return;
+
+    diffSel += hur;
+    if (diffSel >= songs[freeplaySel].difficulties.length) diffSel = 0;
+    if (diffSel < 0) diffSel = songs[freeplaySel].difficulties.length-1;
+
+    diffSelecter.text = songs[freeplaySel].difficulties[diffSel].toLowerCase();
+    diffSelecter.color = switch(diffSelecter.text) {
+        case "hard": 0xFFFF0000;
+        case "normal": 0xFFFFFF00;
+        case "easy": 0xFF00FF00;
+        default: 0xFFFFFFFF;
+    };
+    diffSelecter.updateHitbox();
+    diffSelecter.setPosition(FlxG.width/2 - diffSelecter.width/2, bottomBar.y + bottomBar.height/2 - diffSelecter.height/2);
+    for (i in 0...arrowSelectors.length) {
+        var spr = arrowSelectors[i];
+        var x = (i > 0) ? diffSelecter.x - spr.width - 20 : diffSelecter.x + diffSelecter.width + 20;
+        spr.setPosition(x, bottomBar.y + bottomBar.height/2 - spr.height/2);
+
+        if (songs[freeplaySel].difficulties.length == 1) spr.alpha = 0.0001;
+    }
+}
+
 var freeplayEntering:Bool = false;
 var freeplayAnimTimer:FlxTimer = new FlxTimer();
 function enterFreeplaySong() {
     if (freeplayEntering) return;
     CoolUtil.playMenuSFX(1);
+
+    lastSelectedFreeplaySong = freeplaySel;
     freeplayEntering = true;
 
-    freeplayAnimTimer.start(2.5, function(tmr) {
-        loadAndPlaySong(songs[freeplaySel].name, "normal");
+    freeplayAnimTimer.start(3.5, function(tmr) {
+        loadAndPlaySong(songs[freeplaySel].name, songs[freeplaySel].difficulties[diffSel]);
     });
     for (idx in 0...songNames.length) {
         var spr = songNames[idx];

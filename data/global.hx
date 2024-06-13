@@ -28,6 +28,8 @@ import flixel.system.scaleModes.RatioScaleMode;
 import openfl.system.Capabilities;
 import funkin.backend.utils.WindowUtils;
 
+import funkin.backend.system.FunkinRatioScaleMode;
+
 importScript('LJ Arcade API/challenges');
 
 static var queuedSubStates = [];
@@ -48,9 +50,16 @@ function postStateSwitch() {
     _fromFreeplay = false;
 }
 
+function gameResized(w, h) {    
+    if ((FlxG.scaleMode is FunkinRatioScaleMode)) return;
+    FlxG.scaleMode = new FunkinRatioScaleMode();
+}
+
 static var modGlobalScript = null;
 static var _fromFreeplay:Bool = false;
 static var __customArgs:Array<Dynamic> = [];
+
+static var lastSelectedFreeplaySong:Int = null;
 function preStateSwitch() {
     FlxG.camera.bgColor = 0xFF000000;
     
@@ -61,9 +70,11 @@ function preStateSwitch() {
         GlobalScript.onModSwitch(ModsFolder.currentModFolder);
         modGlobalScript = GlobalScript.scripts.importScript("data/global.hx");
         modGlobalScript.set("preStateSwitch", function() {}); // hehe
+        modGlobalScript.set("postStateSwitch", function() {}); // hehe
     } else {
         window.frameRate = Options.framerate;
         if (modGlobalScript != null) {
+            modGlobalScript.call("ljarcade_scriptRemoved");
             GlobalScript.onModSwitch(ModsFolder.currentModFolder);
             
             modGlobalScript = null;
@@ -74,18 +85,37 @@ function preStateSwitch() {
         _fromFreeplay = true;
         FlxG.game._requestedState = new ModState("ModMainMenu");
     }
+    
+    var allStates = FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/data/states");
+
+    var possibleState:Bool = true;
+    if ((Type.getClass(FlxG.game._requestedState) == ModState) ) {
+        for (state in allStates) {
+            state = Path.withoutExtension(state);
+            trace(state + " | " + FlxG.game._requestedState.lastName);
+            if ((state == FlxG.game._requestedState.lastName) || (state == (customPrefix+"."+FlxG.game._requestedState.lastName))) {
+                possibleState = true;
+                break;
+            }
+            possibleState = false;
+        }
+    }
+    if (!possibleState) {
+        trace("uh oh! Not an LJ Arcade state, get fucked!");
+        FlxG.game._requestedState = new ModState("ModMainMenu");
+    }
 
 	if (!initialized) {
 		initialized = true;
 		//FlxG.game._requestedState = new ModState('WarningState');
 	} else {
-        var thing = FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/data/states");
-        for (state in thing) {
+        for (state in allStates) {
             var fileName = Path.withoutExtension(state);
             var split = fileName.split(".");
+
             if (split[0] != customPrefix) continue;
             var requestedState = Type.getClassName(Type.getClass(FlxG.game._requestedState)).split(".");
-            
+
             if (requestedState[requestedState.length-1] == split[split.length-1]
             || (Type.getClass(FlxG.game._requestedState) == ModState) && (FlxG.game._requestedState.lastName == split[split.length-1])) {
 				FlxG.game._requestedState = new ModState(fileName);

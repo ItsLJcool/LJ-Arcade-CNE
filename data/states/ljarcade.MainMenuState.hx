@@ -6,6 +6,8 @@ import funkin.menus.ModSwitchMenu;
 import sys.FileSystem;
 import haxe.io.Path;
 
+import StringTools;
+
 var modsInFolder:Array<String> = [];
 
 var modCardSprite:FlxSprite;
@@ -20,9 +22,13 @@ var bgIconSpr:FlxSprite;
 var sideBoxes:Array<FlxSprite> = [];
 var arrow:FlxSprite;
 
+var _animationPlayed:Int = 0;
+var ads = 3;
+var _prevAd:Int = 0;
 function new() {
     for (item in FileSystem.readDirectory(ModsFolder.modsPath)) {
         if (Path.extension(item) != "" || item == ModsFolder.currentModFolder) continue;
+        if (FileSystem.exists(ModsFolder.modsPath+item+"/.removeLJarcade")) continue;
         modsInFolder.push(item);
     }
 }
@@ -30,43 +36,12 @@ function create() {
     FlxG.mouse.visible = true;
     FlxG.camera.bgColor = 0xFF808080;
 
-    iconSpr = new FlxSprite(0,0, Paths.image("ModMenu/bgs/arcadeBG")); // placeholdor
-    // iconSpr = new FlxSprite().makeGraphic(200, 200, 0xFF000000); // placeholdor
-
-    bgIconSpr = new FlxSprite().makeGraphic(375, 375, 0xFF000000); // placeholdor
-    bgIconSpr.onDraw = function(spr:FlxSprite) {
-        spr.setPosition(iconSpr.x, iconSpr.y - 50);
-        spr.draw();
-    };
-    add(bgIconSpr);
-    add(iconSpr);
-    
-
-    arcadeMachine = new FlxSprite();
-    arcadeMachine.frames = Paths.getSparrowAtlas("MainMenu/arcadebox");
-    arcadeMachine.animation.addByPrefix("ad", "ADVERTISEMENT0", 24, true);
-    arcadeMachine.animation.addByPrefix("shell", "ARCADESHELL0", 24, false);
-    arcadeMachine.animation.addByPrefix("transition", "ARCADETRANSITION0", 24, true);
-    arcadeMachine.animation.play("transition", true);
-    arcadeMachine.scale.set(0.7, 0.7);
-    arcadeMachine.updateHitbox();
-    arcadeMachine.x = FlxG.width - arcadeMachine.width - 15;
-    arcadeMachine.y = FlxG.height - arcadeMachine.height + 100;
-    add(arcadeMachine);
-    arcadePlay("ad", 0.5, 2);
-    
-    iconSpr.setGraphicSize(375, 375);
-    // iconSpr.scale.set(Math.min(iconSpr.scale.x, iconSpr.scale.y), Math.min(iconSpr.scale.x, iconSpr.scale.y));
-    iconSpr.updateHitbox();
-    iconSpr.x = arcadeMachine.x + arcadeMachine.width/2 - iconSpr.width/2;
-    iconSpr.y = arcadeMachine.y + arcadeMachine.height/2 - iconSpr.height/2 - 75;
-
     // temp graphic, replace with something cooler pls
     modCardSprite = new FlxSprite().makeGraphic(400, 150, 0xFFFFFFFF);
     modCardSprite.onDraw = cardUpdate;
     modCardSprite.screenCenter();
     add(modCardSprite);
-
+    
     for (i in 0..._songItems) {
         var text = new FlxText(_cachePos[i].x, _cachePos[i].y, 0, "poggor " + i);
         text.color = 0xFF000000;
@@ -78,6 +53,51 @@ function create() {
     
     _cachePos.resize(_songItems);
 
+    iconSpr = new FlxSprite(0,0, Paths.image("ModMenu/bgs/arcadeBG")); // placeholdor
+    // iconSpr = new FlxSprite().makeGraphic(200, 200, 0xFF000000); // placeholdor
+
+    bgIconSpr = new FlxSprite().makeGraphic(375, 375, 0xFF000000); // placeholdor
+    bgIconSpr.onDraw = function(spr:FlxSprite) {
+        spr.setPosition(iconSpr.x, iconSpr.y - 50);
+        spr.draw();
+    };
+    add(bgIconSpr);
+    add(iconSpr);
+
+    arcadeMachine = new FlxSprite();
+    arcadeMachine.frames = Paths.getSparrowAtlas("MainMenu/not_just_a_hat");
+    arcadeMachine.animation.addByPrefix("ad_0", "ADVERTISEMENT1", 24, false);
+    arcadeMachine.animation.addByPrefix("ad_1", "ADVERTISEMENT2", 24, false);
+    arcadeMachine.animation.addByPrefix("ad_2", "ADVERTISEMENT3", 24, false);
+    arcadeMachine.animation.addByPrefix("ad_3", "ADVERTISEMENT4", 24, false);
+    arcadeMachine.animation.addByPrefix("shell", "ARCADESHELL0", 24, false);
+    arcadeMachine.animation.addByPrefix("transition", "ARCADETRANSITION0", 24, true);
+    arcadeMachine.animation.play("transition", true);
+    arcadeMachine.scale.set(0.7, 0.7);
+    arcadeMachine.updateHitbox();
+    arcadeMachine.x = FlxG.width - arcadeMachine.width - 15;
+    arcadeMachine.y = FlxG.height - arcadeMachine.height + 100;
+    add(arcadeMachine);
+    arcadeMachine.animation.finishCallback = function(name:String) {
+        var split = name.split("_");
+        if (split[0] != "ad") return;
+        _animationPlayed++;
+        if (_animationPlayed > 1 || split[1] == "1") {
+            _animationPlayed = 0;
+            _prevAd = Std.int(split[1]); 
+            arcadePlay("ad", 0.75);
+        }
+        else {
+            arcadeMachine.animation.play(name, true);
+        }
+    };
+    arcadePlay("mod", 0.5);
+    
+    iconSpr.setGraphicSize(375, 375);
+    // iconSpr.scale.set(Math.min(iconSpr.scale.x, iconSpr.scale.y), Math.min(iconSpr.scale.x, iconSpr.scale.y));
+    iconSpr.updateHitbox();
+    iconSpr.x = arcadeMachine.x + arcadeMachine.width/2 - iconSpr.width/2;
+    iconSpr.y = arcadeMachine.y + arcadeMachine.height/2 - iconSpr.height/2 - 75;
 
     for (i in 0...2) {
         var spr = new FlxSprite();
@@ -105,16 +125,15 @@ function create() {
     add(arrow);
 }
 
-function arcadePlay(anim, timeTransition:Int = 0.5, other:Int = 0.5) {
+function arcadePlay(anim, timeTransition:Int = 0.5) {
     if (timeTransition == null) timeTransition = 0.5;
-    if (other == null) other = 0.5;
     if (arcadeMachine.animation.name != "transition") arcadeMachine.animation.play("transition", true);
     new FlxTimer().start(timeTransition, function(tmr) {
         switch(anim) {
-            case "ad", 0:
-                arcadeMachine.animation.play("ad", true);
-                new FlxTimer().start(other, function(tmr) { arcadePlay("mod"); });
-            case "mod", 1: arcadeMachine.animation.play("shell", true);
+            case "mod", 0: arcadeMachine.animation.play("shell", true);
+            case "ad", 1:
+                var randomAdvert = FlxG.random.int(0, ads, [_prevAd]);
+                arcadeMachine.animation.play("ad_"+randomAdvert, true);
         }
     });
 }
@@ -127,6 +146,7 @@ var enteringMod:Bool = false;
 
 var selectionTimer:FlxTimer = new FlxTimer();
 var hoveringOverSelTimer:FlxTimer = new FlxTimer();
+var toAdTimer:FlxTimer = new FlxTimer();
 function changeSelected(hur:Int = 0) {
     if (enteringMod || selectionTimer.active) return;
     
@@ -148,6 +168,11 @@ function changeSelected(hur:Int = 0) {
     
     prevSel = curSel;
     hoveringOverSelTimer.start(1, hoveringOverSelectedMod);
+    toAdTimer.start(7, function(tmr) {
+        if (prevSel != curSel) return;
+        
+        arcadePlay("ad");
+    });
 }
 
 function enterModState() {
