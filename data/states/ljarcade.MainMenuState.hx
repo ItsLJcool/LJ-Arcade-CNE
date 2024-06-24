@@ -247,6 +247,8 @@ function update(elapsed) {
     }
 
     if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT) doFunnyTest();
+
+    if (FlxG.keys.justPressed.P) FlxG.switchState(new ModState("GameJolt Login"));
 }
 
 function doFunnyTest() {

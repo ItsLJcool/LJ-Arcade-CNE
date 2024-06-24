@@ -29,12 +29,17 @@ import openfl.system.Capabilities;
 import funkin.backend.utils.WindowUtils;
 
 import funkin.backend.system.FunkinRatioScaleMode;
+import StringTools;
+
+import funkin.editors.ui.UIState;
 
 importScript('LJ Arcade API/challenges');
 
 static var queuedSubStates = [];
 
 static var _loadedModAssetLibrary:Map<String, AssetLibrary> = [];
+
+static var usingGameJolt = false;
 
 
 static var initialized:Bool = false;
@@ -60,8 +65,11 @@ static var _fromFreeplay:Bool = false;
 static var __customArgs:Array<Dynamic> = [];
 
 static var lastSelectedFreeplaySong:Int = null;
+
+var goingToUIstate:Bool = false;
 function preStateSwitch() {
     FlxG.camera.bgColor = 0xFF000000;
+    trace(FlxG.game._requestedState is UIState);
     
     if (FlxG.game._requestedState is PlayState) {
         EventsData.reloadEvents();
@@ -87,14 +95,26 @@ function preStateSwitch() {
     }
     
     var allStates = FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/data/states");
-
     var possibleState:Bool = true;
-    if ((Type.getClass(FlxG.game._requestedState) == ModState) ) {
+    if ((Type.getClass(FlxG.game._requestedState) == ModState) || (Type.getClass(FlxG.game._requestedState) == UIState)) {
         for (state in allStates) {
             state = Path.withoutExtension(state);
-            trace(state + " | " + FlxG.game._requestedState.lastName);
-            if ((state == FlxG.game._requestedState.lastName) || (state == (customPrefix+"."+FlxG.game._requestedState.lastName))) {
+            var checking = FlxG.game._requestedState.lastName;
+            var checkNull = (checking == null);
+            if (checkNull) checking = FlxG.state.scriptName;
+            trace(state + " | " + checking);
+            if ((state == checking) || (state == (customPrefix+"."+checking))
+            || (state == (customPrefix+".ui."+checking))) {
                 possibleState = true;
+                goingToUIstate = (checkNull) ? (state == checking) : (state == (customPrefix+".ui."+checking));
+                trace("goingToUIstate: " + goingToUIstate);
+                if (goingToUIstate && checkNull) {
+                    FlxG.game._requestedState = new UIState(true, checking);
+                    // basically we can tell if we are just reloading the state by this, but it could
+                    // check if we are switching from UI to UI state but not sure yet.
+                    // please lmk if that does this
+                    return;
+                }
                 break;
             }
             possibleState = false;
@@ -102,7 +122,7 @@ function preStateSwitch() {
     }
     if (!possibleState) {
         trace("uh oh! Not an LJ Arcade state, get fucked!");
-        FlxG.game._requestedState = new ModState("ModMainMenu");
+        FlxG.game._requestedState = new MainMenuState();
     }
 
 	if (!initialized) {
@@ -118,12 +138,16 @@ function preStateSwitch() {
 
             if (requestedState[requestedState.length-1] == split[split.length-1]
             || (Type.getClass(FlxG.game._requestedState) == ModState) && (FlxG.game._requestedState.lastName == split[split.length-1])) {
-				FlxG.game._requestedState = new ModState(fileName);
+				FlxG.game._requestedState = (goingToUIstate) ? new UIState(true, fileName) : new ModState(fileName);
+                
+                trace(FlxG.game._requestedState is UIState);
                 return;
             }
         }
+
+        // Map, prob going unused but will keep it here for the people yoinking my code ig... theifs !!
 		for (redirectState in redirectStates.keys())
-			if (FlxG.game._requestedState is redirectState)
+			if (FlxG.game._requestedState is redirectState) 
 				FlxG.game._requestedState = new ModState(redirectStates.get(redirectState));
 	}
 }
