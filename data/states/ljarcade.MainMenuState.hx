@@ -248,7 +248,13 @@ function update(elapsed) {
 
     if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT) doFunnyTest();
 
-    if (FlxG.keys.justPressed.P) FlxG.switchState(new ModState("GameJolt Login"));
+    if (FlxG.keys.justPressed.P) {
+        if (FlxG.sound.music != null) {
+            FlxG.sound.music.stop();
+            FlxG.sound.music = null;
+        }
+        FlxG.switchState(new ModState("GameJolt Login"));
+    }
 }
 
 function doFunnyTest() {

@@ -12,18 +12,33 @@ import funkin.backend.assets.ModsFolder;
 
 public function getGameJoltName() { return Base64.decode(Assets.getText(Paths.getPath("Temp GameJolt API/TOKEN"))).toString(); }
 
-public var GameJolt = {
+public static var GameJolt = {
 	http: new Http(''),
 	id: 901749,
 	privateKey: getGameJoltName(),
 
-	username: 'ItsLJcool',
-	token: 'DxQYfX', // dont try shit lmao, this is being refreshed when i make source public. Losor!!
+	username: '',
+	token: '', // dont try shit lmao, this is being refreshed when i make source public. Losor!!
+
+	auth: function(username:String, token:String) {
+		var params = [{name: "username", value: username}, {name: "user_token", value: token}];
+		var url:String = 'https://api.gamejolt.com/api/game/v1_2/' + "users/auth" + '/?game_id=' + GameJolt.id;
+		for (i in params)
+			url += '&' + Std.string(i.name) + '=' + Std.string(i.value);
+		var urlEncoded:String = Md5.encode(url + GameJolt.privateKey);
+		GameJolt.http.url = url + '&signature=' + urlEncoded;
+		GameJolt.http.request(false);
+		
+		return Json.parse(GameJolt.http.responseData);
+	},
+
 	/**
 		@param endpoint [String] - The API Endpoint you are trying to fetch, example: `users`
 		@param params `{name:String, value:String}` - Data you are sending for the API to recieve. Example: `{name: "username", value: "ItsLJcool"}`
 	**/
 	get: function(endpoint:String, params:Array<{name:String, value:String}>) {
+		if (!usingGameJolt) return { response: { message: "Not logged into gamejolt", success: "false" } };
+		
 		var url:String = 'https://api.gamejolt.com/api/game/v1_2/' + endpoint + '/?game_id=' + GameJolt.id;
 		for (i in params)
 			url += '&' + Std.string(i.name) + '=' + Std.string(i.value);
@@ -35,6 +50,8 @@ public var GameJolt = {
 	},
 
 	set: function(endpoint:String, params:Array<{name:String, value:String}>) {
+		if (!usingGameJolt) return { response: { message: "Not logged into gamejolt", success: "false" } };
+
 		var url:String = 'https://api.gamejolt.com/api/game/v1_2/' + endpoint + '/?game_id=' + GameJolt.id;
 		for (i in params)
 			url += '&' + Std.string(i.name) + '=' + Std.string(i.value);
@@ -62,6 +79,8 @@ public var GameJolt = {
 
 	lastUnlockedTrophy: null,
 	unlockTrophy: function(trophyId) {
+		if (!usingGameJolt) return { response: { message: "Not logged into gamejolt", success: "false" } };
+
 		var id:Int = trophyId;
 		Main.execAsync(function() {
 			var trophy = GameJolt.get('trophies', [{name: 'username', value: GameJolt.username}, {name: 'user_token', value: GameJolt.token}, {name: 'trophy_id', value: id}]).response.trophies[0];
