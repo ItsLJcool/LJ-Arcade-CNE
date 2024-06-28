@@ -34,6 +34,7 @@ import StringTools;
 import funkin.editors.ui.UIState;
 
 importScript('LJ Arcade API/challenges');
+importScript("Temp GameJolt API/gamejolt test");
 
 static var queuedSubStates = [];
 
@@ -125,8 +126,15 @@ function preStateSwitch() {
         FlxG.game._requestedState = new MainMenuState();
     }
 
+    trace("GameJolt.username: " + GameJolt.username);
+    trace("GameJolt.token: " + GameJolt.token);
 	if (!initialized) {
 		initialized = true;
+        if (FlxG.save.data.GameJoltUsername != null && FlxG.save.data.GameJoltToken != null) {
+            GameJolt.username = FlxG.save.data.GameJoltUsername;
+            GameJolt.token = FlxG.save.data.GameJoltToken;
+            usingGameJolt = true;
+        }
 		//FlxG.game._requestedState = new ModState('WarningState');
 	} else {
         for (state in allStates) {

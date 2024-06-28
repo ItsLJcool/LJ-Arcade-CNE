@@ -38,10 +38,9 @@ var tokenHiddenText:UIText;
 var loginButton:UIButton;
 var logOutButton:UIButton;
 
-var allTrophies:FlxTypedSpriteGroup;
-var trophyRect:FlxRect;
-
 var gamejoltUserAvitar:FlxSprite;
+
+var gamejoltCamera:FlxCamera;
 function create() {
     grayscaleShader = new CustomShader("ljarcade.greenscale");
     if (FlxG.sound.music == null) CoolUtil.playMusic(Paths.music("logInState"), true, 1, true, 100);
@@ -110,6 +109,16 @@ function create() {
     profileWindow.titleSpr.x = profileWindow.x + (profileWindow.bWidth / 2) - profileWindow.titleSpr.width/4 + 30;
     add(profileWindow);
     
+    gamejoltCamera = new FlxCamera(profileWindow.x, profileWindow.y+profileWindow.bHeight*0.35, profileWindow.bWidth, profileWindow.bHeight*0.65);
+    // gamejoltCamera.bgColor = 0x66FF0000;
+    gamejoltCamera.bgColor = 0;
+    FlxG.cameras.add(gamejoltCamera, false);
+
+    allTrophies = new FlxTypedSpriteGroup();
+    allTrophies.cameras = [gamejoltCamera];
+    add(allTrophies);
+    
+    
     var userData = GameJolt.get("users", [{name: "username", value: GameJolt.username}]);
     if (userData.response.success == "true") {
         gamejoltUserAvitar = new FlxSprite();
@@ -123,37 +132,40 @@ function create() {
         });
         add(gamejoltUserAvitar);
     }
-
-    allTrophies = new FlxTypedSpriteGroup();
-    add(allTrophies);
-    trophyRect = new FlxRect(profileWindow.x, (profileWindow.y+30), profileWindow.bWidth, (profileWindow.bHeight-30)*0.75);
-    trophyRect.y += trophyRect.height*0.25 + 30;
-    add(new FlxSprite(trophyRect.x, trophyRect.y).makeGraphic(trophyRect.width, trophyRect.height, 0x80FF0000));
     
     var userTrophies = GameJolt.get("trophies", [{name: "username", value: GameJolt.username}, {name: "user_token", value: GameJolt.token},]);
     trace(userTrophies.response.success);
     if (userTrophies.response.success == "true") {
-        for (item in userTrophies.response.trophies) {
-            addTrophy(item.image_url);
+        for (idx in 0...userTrophies.response.trophies.length) {
+            var item = userTrophies.response.trophies[idx];
+            addTrophy(item.image_url, idx);
         }
     }
 
 }
 
 var profileWindow:UIWindow;
-function addTrophy(url:String) {
-    var trophy:FlxSprite = new FlxSprite().makeGraphic(75, 75, 0xFFFFFFFF);
+
+var maxWidth:Int = 4;
+var offsetTrophy:Float = 50;
+var yOffset:Float = 30;
+
+var allTrophies:FlxTypedSpriteGroup;
+function addTrophy(url:String, idx) {
+    var trophy = new FlxSprite().makeGraphic(75, 75, 0xFFFFFFFF);
+    trophy.ID = idx;
+    trophy.x = (trophy.width + 15)*(idx % maxWidth) + offsetTrophy;
+    trophy.y = (trophy.height + yOffset)*Std.int(idx / maxWidth) + offsetTrophy;
     trophy.antialiasing = true;
-    trophy.updateHitbox();
-    // trophy.alpha = 0.25;
-
-    // urlImage(url, trophy, function(bitmap) {
-    //     trophy.setGraphicSize(75, 75);
-    //     trophy.updateHitbox();
-    // }); // queue trophy loading shit
-
     allTrophies.add(trophy);
-    
+
+    urlImage(url, trophy, function(bitmap) {
+        trophy.setGraphicSize(75, 75);
+        trophy.updateHitbox();
+        
+        trophy.x = (trophy.width + 15)*(trophy.ID % maxWidth) + offsetTrophy;
+        trophy.y = (trophy.height + yOffset)*Std.int(trophy.ID / maxWidth) + offsetTrophy;
+    });
 }
 
 var _defaultText:Array<String> = ["Username", "Token"];
@@ -166,23 +178,7 @@ function update(elapsed) {
     if (FlxG.keys.justPressed.ESCAPE) FlxG.switchState(new MainMenuState());
 
     updateTextBoxPlaceholder(elapsed);
-    updateTrophyDisplay(elapsed);
 }
-
-var scrollY = 0;
-function updateTrophyDisplay(elapsed) {
-    allTrophies.forEach(function(member) { member.clipRect = calcRelativeRect(member, trophyRect); });
-    if (allTrophies.height < FlxG.height) return;
-    var lastItem = allTrophies.members[allTrophies.members.length-1];
-    
-    var bound = FlxG.height/2 - 150;
-
-    scrollY -= FlxG.mouse.wheel * 50;
-    scrollY = FlxMath.bound(scrollY, 0, bound);
-    allTrophies.y = FlxMath.lerp(allTrophies.y, -scrollY, FlxMath.bound(0.25 * 60 * FlxG.elapsed, 0, 1));
-}
-
-function calcRelativeRect(spr:FlxSprite, rect:FlxRect) { return FlxRect.get(rect.x - spr.x, rect.y - spr.y, rect.width, rect.height); }
 
 function onLoginGameJolt() {
     var _cacheUsername = usernameInput;
@@ -197,6 +193,7 @@ function onLoginGameJolt() {
     } else {
         GameJolt.username = "";
         GameJolt.token = "";
+        FlxG.save.data.GameJoltUsername = FlxG.save.data.GameJoltToken = null;
         usingGameJolt = false;
     }
     

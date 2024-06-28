@@ -190,6 +190,7 @@ function stateDisplay() {
 
 }
 
+var levels = 0;
 function levelArt() {
     levelBar = new FlxBar(0,0, null, 350, 25, levels, "xp", 0, xpMaxLevels[levels.level]);
     levelBar.x = FlxG.width - levelBar.width - 25;

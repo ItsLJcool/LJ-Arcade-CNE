@@ -29,7 +29,12 @@ public static var GameJolt = {
 		GameJolt.http.url = url + '&signature=' + urlEncoded;
 		GameJolt.http.request(false);
 		
-		return Json.parse(GameJolt.http.responseData);
+		var returnMessage = Json.parse(GameJolt.http.responseData);
+		if (returnMessage.response.success == "true") {
+			FlxG.save.data.GameJoltUsername = username;
+			FlxG.save.data.GameJoltToken = token;
+		}
+		return returnMessage;
 	},
 
 	/**
@@ -93,4 +98,10 @@ public static var GameJolt = {
 			}
 		});
 	}
+};
+
+public var gamejolt_data = {
+    xp: 0,
+    level: 0,
+    tokens: 0,
 };
