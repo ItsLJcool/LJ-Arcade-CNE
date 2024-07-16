@@ -78,12 +78,10 @@ See the [GameJolt API Docs](https://gamejolt.com/api/doc/game/users/fetch) to ge
 
 #### Parameters
 > [!NOTE]
-> Useful information that users should know, even when skimming content.
+> Username and User ID are the same thing, but I'm using them interchangeably. So its a one parameter function, so you can only use one of the two parameters.
 
 > - `username` **[ string ]** - The username of the user you are trying to fetch.
 > - `user_id` **[ int ]** - The user id of the user you are trying to fetch.
-
-Its a one parameter function, so you can only use one of the two parameters.
 
 #### Example
 ```haxe
