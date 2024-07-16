@@ -33,8 +33,8 @@ import StringTools;
 
 import funkin.editors.ui.UIState;
 
-importScript('LJ Arcade API/challenges');
-importScript("Temp GameJolt API/gamejolt test");
+importScript("LJ Arcade API/ljarcade.challenges");
+importScript("GameJolt API/Api");
 
 static var queuedSubStates = [];
 
@@ -45,6 +45,10 @@ static var usingGameJolt = false;
 
 static var initialized:Bool = false;
 static var customPrefix = "ljarcade";
+
+function new() {
+
+}
 
 static var redirectStates:Map<FlxState, String> = [
     // MainMenuState => 'ljarcade.MainMenuState',
@@ -69,6 +73,7 @@ static var lastSelectedFreeplaySong:Int = null;
 
 var goingToUIstate:Bool = false;
 function preStateSwitch() {
+    
     FlxG.camera.bgColor = 0xFF000000;
     trace(FlxG.game._requestedState is UIState);
     

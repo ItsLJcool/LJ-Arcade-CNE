@@ -13,12 +13,6 @@ public var xpMaxLevels = [
     3 => 650,
 ];
 
-/**
-    Structure for Level Saving
-**/
-var versionResets = [];  // input version number and if someone has a lesser version and updates, reset the data
-
-
 var noKeyFound = "No item with that key could be found.";
 var _maxFailSafe:Int = 5;
 

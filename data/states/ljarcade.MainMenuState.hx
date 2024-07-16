@@ -34,7 +34,7 @@ function new() {
 }
 function create() {
     FlxG.mouse.visible = true;
-    FlxG.camera.bgColor = 0xFF808080;
+    add(new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF808080));
 
     // temp graphic, replace with something cooler pls
     modCardSprite = new FlxSprite().makeGraphic(400, 150, 0xFFFFFFFF);
@@ -214,14 +214,29 @@ function cardUpdate(sprite:FlxSprite) {
         sprite.x = _cachePos[i].x;
         sprite.y = _cachePos[i].y;
 
-        modNames[i].scale.x = Math.min((sprite.width - 15) / modNames[i].frameWidth, 1);
-        modNames[i].updateHitbox();
+        var alpha = (songItem != curSel) ? 0.5 : 1;
+        sprite.alpha = _cachePos[i].alpha = FlxMath.lerp(_cachePos[i].alpha, alpha, FlxG.elapsed*5);
+        modNames[i].alpha = FlxMath.lerp(modNames[i].alpha, alpha*0.5, FlxG.elapsed*5);
+
         modNames[i].x = _cachePos[i].x + sprite.width * 0.5 - modNames[i].width * 0.5;
         modNames[i].y = _cachePos[i].y + sprite.height * 0.5 - modNames[i].height * 0.5;
-        modNames[i].text = modsInFolder[songItem];
 
         sprite.draw();
     }
+}
+
+function postUpdate(elapsed) {
+
+    // we make scaling non dependent on drawing since drawing isn't bound to update function for some reason
+    for (i in 0..._cachePos.length) {
+        var songItem = (i - _songCenter) + curSel;
+        songItem = ((songItem % modsInFolder.length) + modsInFolder.length) % modsInFolder.length; // this should be a positive modulo.
+
+        modNames[i].scale.x = Math.min((modCardSprite.width - 15) / modNames[i].frameWidth, 1);
+        modNames[i].updateHitbox();
+        modNames[i].text = modsInFolder[songItem];
+    }
+    
 }
 
 function update(elapsed) {
@@ -255,6 +270,9 @@ function update(elapsed) {
         }
         FlxG.switchState(new ModState("GameJolt Login"));
     }
+
+    if (FlxG.keys.justPressed.L) 
+        FlxG.switchState(new ModState("TestAPI"));
 }
 
 function doFunnyTest() {
