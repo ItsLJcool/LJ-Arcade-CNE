@@ -63,8 +63,8 @@ Code examples will have the `result` variable as the return value of the functio
 This function is used to authenticate the user with GameJolt, and returns a `response` object with a `success` value of `true` or `false`.
 
 #### Parameters
-- > `username` **[ string ]** - The username of the user you are trying to authenticate.
-- >`token` **[ string ]** - The token of the user you are trying to authenticate.
+> - `username` **[ string ]** - The username of the user you are trying to authenticate.
+> - `token` **[ string ]** - The token of the user you are trying to authenticate.
 
 #### Example
 ```haxe
