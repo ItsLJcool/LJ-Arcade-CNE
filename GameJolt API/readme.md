@@ -77,8 +77,8 @@ It also returns a `user` object with the user's information.<br/>
 See the [GameJolt API Docs](https://gamejolt.com/api/doc/game/users/fetch) to get the data structure of the `user` object.
 
 #### Parameters
-- `username` **[ string ]** - The username of the user you are trying to fetch.
-- `user_id` **[ int ]** - The user id of the user you are trying to fetch.
+> - `username` **[ string ]** - The username of the user you are trying to fetch.
+> - `user_id` **[ int ]** - The user id of the user you are trying to fetch.
 
 > [!NOTE]
 > Username and User ID are the same thing, but I'm using them interchangeably. So its a one parameter function, so you can only use one of the two parameters.
