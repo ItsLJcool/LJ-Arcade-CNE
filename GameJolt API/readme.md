@@ -220,7 +220,7 @@ If `user` `false`, then you **must** provide the `guest` parameter.<br/>
 if `user` is `true`, then the guest field is nullified.<br/><br/>
 
 
-> [!NOTE]
+> [!WARNING]
 > The `extra_data` and `table_id` parameter are optional, its a bit confusing<br/><br/>
 If you are using **5** parameters, if you are using the `table_id` variable, then its just `updateScore_5`<br/><br/>
 Otherwiseif you are using the `extra_data` variable, then its just `updateScore_extra_6`<br/><br/>
