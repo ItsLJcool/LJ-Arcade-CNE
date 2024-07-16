@@ -63,7 +63,7 @@ And we are done with initalizing the NDLL!!
 
 # Ndll API Functions
 
-> [!WARN]
+> [!WARNING]
 > Not all of these functions have been thouroughly tested, so please make sure to test them before using them in your mod.<br/>
 If you please report any bugs, please make sure to include the function name and the parameters you used.<br/><br/>
 And DM Me or Neo on Discord if you need any help with the functions.
@@ -171,7 +171,7 @@ This function is used to fetch the scores of a user from GameJolt, and returns a
 
 <br/>
 
-> [!WARN]
+> [!WARNING]
 > The `user` parameter is NOT optional, it is required to be `true` or `false`.<br/>
 If `user` `false`, then you **must** provide the `guest` parameter.<br/>
 if `user` is `true`, then the guest field is nullified.
