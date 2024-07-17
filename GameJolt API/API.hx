@@ -13,24 +13,23 @@ public static var GameJolt = {
 
 var ndllName = "gamejolt-api";
 
+NdllUtil.getFunction(ndllName, "setup_type", 1)(Type);
+var registerThread = NdllUtil.getFunction(ndllName, "registerThread", 0);
+registerThread();
+#if ALLOW_MULTITHREADING
+	for (i in 0...Main.gameThreads.length) {
+		Main.execAsync(registerThread);
+	}
+#end
+
 var asyncStack:Array<Array<Dynamic>> = []; // [[name, args, result]]
+NdllUtil.getFunction(ndllName, "set_async_stack", 1)(asyncStack);
 
 var async_call = NdllUtil.getFunction(ndllName, "async_ndll_call", 2);
 public function gamejolt_init() {
-	
     NdllUtil.getFunction(ndllName, "set_ndll_name", 1)(ndllName); // because we love Neo (he is being lazy)
 	NdllUtil.getFunction(ndllName, "gamejolt_init", 2)(Type,
 	"2af137395810fabb4391a26fede73ad39a9ca69084cf103589472e0c0eb77325090638a68431fcd353a67a4e28260da3");
-	
-	var registerThread = NdllUtil.getFunction(ndllName, "registerThread", 0);
-	registerThread();
-	#if ALLOW_MULTITHREADING
-		for (i in 0...Main.gameThreads.length) {
-			Main.execAsync(registerThread);
-		}
-	#end
-
-	NdllUtil.getFunction(ndllName, "set_async_stack", 1)(asyncStack);
 
 	login(GameJolt.username, GameJolt.token);
 }
