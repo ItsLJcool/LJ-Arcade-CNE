@@ -1,3 +1,7 @@
+/**
+	OUTDATED!! LOOK IN THE GAMEJOLT API FOLDER
+**/
+
 import sys.Http;
 import haxe.crypto.Md5;
 

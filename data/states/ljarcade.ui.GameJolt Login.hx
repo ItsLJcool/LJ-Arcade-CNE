@@ -20,7 +20,9 @@ import flixel.group.FlxTypedGroup;
 import flixel.group.FlxTypedSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxRect;
-importScript("Temp GameJolt API/gamejolt test");
+
+// REDO THE GAMEJOLT API CODE TO WORK WITH NEW API
+// importScript("Temp GameJolt API/gamejolt test");
 importScript("LJ Arcade API/LoadImageURL");
 var typesOfBGs = [];
 

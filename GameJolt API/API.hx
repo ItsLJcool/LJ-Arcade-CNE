@@ -11,7 +11,7 @@ public static var GameJolt = {
     username: null, token: null,
 };
 
-var ndllName = "gamejolt-api";
+var ndllName = "GameJolt-API-NDLL-CNE/gamejolt-api";
 public function gamejolt_init() {
     NdllUtil.getFunction(ndllName, "gamejolt_init", 2)(Type,
     "2af137395810fabb4391a26fede73ad39a9ca69084cf103589472e0c0eb77325090638a68431fcd353a67a4e28260da3");
