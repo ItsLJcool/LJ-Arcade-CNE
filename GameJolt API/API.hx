@@ -13,21 +13,34 @@ public static var GameJolt = {
 
 var ndllName = "gamejolt-api";
 
-NdllUtil.getFunction(ndllName, "setup_type", 1)(Type);
-var registerThread = NdllUtil.getFunction(ndllName, "registerThread", 0);
-registerThread();
-#if ALLOW_MULTITHREADING
-	for (i in 0...Main.gameThreads.length) {
-		Main.execAsync(registerThread);
-	}
-#end
-
 var asyncStack:Array<Array<Dynamic>> = []; // [[name, args, result]]
-NdllUtil.getFunction(ndllName, "set_async_stack", 1)(asyncStack);
 
-var async_call = NdllUtil.getFunction(ndllName, "async_ndll_call", 2);
+var didSetup = false;
+
+function setup() {
+	if(didSetup) return;
+	didSetup = true;
+	NdllUtil.getFunction(ndllName, "set_ndll_name", 1)(ndllName); // because we love Neo (he is being lazy)
+	NdllUtil.getFunction(ndllName, "setup_type", 1)(Type);
+	var registerThread = NdllUtil.getFunction(ndllName, "registerThread", 0);
+	registerThread();
+	#if ALLOW_MULTITHREADING
+		for (i in 0...Main.gameThreads.length) {
+			Main.execAsync(registerThread);
+		}
+		for (i in 0...Main.gameThreads.length) {
+			Main.execAsync(Main.getTimer);
+		}
+	#end
+
+	NdllUtil.getFunction(ndllName, "set_async_stack", 1)(asyncStack);
+
+	FlxG.signals.postUpdate.add(update);
+}
+
+var async_call = NdllUtil.getFunction(ndllName, "async_ndll_call", 3);
 public function gamejolt_init() {
-    NdllUtil.getFunction(ndllName, "set_ndll_name", 1)(ndllName); // because we love Neo (he is being lazy)
+	setup();
 	NdllUtil.getFunction(ndllName, "gamejolt_init", 2)(Type,
 	"2af137395810fabb4391a26fede73ad39a9ca69084cf103589472e0c0eb77325090638a68431fcd353a67a4e28260da3");
 
@@ -35,13 +48,15 @@ public function gamejolt_init() {
 }
 
 public function login(username:String, token:String) {
+	setup();
 	GameJolt.username = username;
 	GameJolt.token = token;
 	
-	Main.execAsync(async_call("gamejolt_login", [GameJolt.username, GameJolt.token]));
+	//NdllUtil.getFunction(ndllName, "gamejolt_login", 2)(GameJolt.username, GameJolt.token);
+	Main.execAsync(async_call("gamejolt_login", [GameJolt.username, GameJolt.token], "gamejolt_login_main"));
 }
 
-function update(elapsed) {
+function update() {
 	while(asyncStack.length > 0) {
 	    // or asyncStack.pop() if you dont really care about the order.
 	    // Tho we recommend using the shift, or else certain results might take longer to process.
