@@ -48,6 +48,7 @@ static var initialized:Bool = false;
 static var customPrefix = "ljarcade";
 
 function new() {
+    _initCacheSave();
     // gamejolt_init();
 }
 

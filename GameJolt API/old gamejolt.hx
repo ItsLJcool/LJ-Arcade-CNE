@@ -14,6 +14,14 @@ import funkin.backend.system.Main;
 
 import funkin.backend.assets.ModsFolder;
 
+function _initCacheSave() {
+	if (FlxG.save.data.lj_tokens == null) FlxG.save.data.lj_tokens = 0;
+
+	if (FlxG.save.data.lj_xp == null) FlxG.save.data.lj_xp = 0;
+	if (FlxG.save.data.lj_level == null) FlxG.save.data.lj_level = 0;
+	if (FlxG.save.data.lj_rank == null) FlxG.save.data.lj_rank = 0;
+}
+
 public function getGameJoltName() { return Base64.decode(Assets.getText(Paths.getPath("Temp GameJolt API/TOKEN"))).toString(); }
 
 public static var GameJolt = {
