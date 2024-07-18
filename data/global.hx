@@ -34,7 +34,8 @@ import StringTools;
 import funkin.editors.ui.UIState;
 
 importScript("LJ Arcade API/ljarcade.challenges");
-importScript("GameJolt API/Api");
+// importScript("GameJolt API/API");
+importScript("GameJolt API/old gamejolt");
 
 static var queuedSubStates = [];
 
@@ -47,7 +48,7 @@ static var initialized:Bool = false;
 static var customPrefix = "ljarcade";
 
 function new() {
-
+    // gamejolt_init();
 }
 
 static var redirectStates:Map<FlxState, String> = [
