@@ -22,15 +22,18 @@ function _initCacheSave() {
 
 var ndllName = "gamejolt-api";
 public function gamejolt_init() {
-	trace("GameJolt API initialized");
-
-	_initCacheSave();
-	
+    NdllUtil.getFunction(ndllName, "set_ndll_name", 1)(ndllName); // because we love Neo (he is being lazy)
 	NdllUtil.getFunction(ndllName, "gamejolt_init", 2)(Type,
 	"2af137395810fabb4391a26fede73ad39a9ca69084cf103589472e0c0eb77325090638a68431fcd353a67a4e28260da3");
 
 	trace(fetchUser("ItsLJcool"));
 	// login(GameJolt.username, GameJolt.token);
+}
+
+function parse(returnValue:String) {
+	var json = Json.parse(returnValue).response;
+	json.success = (json.success == "true"); // auto convert success to bool becasue we love http
+	return json;
 }
 
 function parse(returnValue:String) {
