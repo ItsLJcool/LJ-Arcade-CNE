@@ -16,7 +16,7 @@ function new() {
 }
 
 function update(elapsed:Float) {
-    if (FlxG.keys.justPressed.ESCAPE) close();
+    if (FlxG.keys.justPressed.ESCAPE) FlxG.state.closeSubState();
 }
 
 var interal_saves = [
@@ -65,7 +65,7 @@ function internalSave() {
     set_xp(FlxG.save.data.lj_xp);
     set_rank(FlxG.save.data.lj_rank);
     
-    close();
+    FlxG.state.closeSubState();
 }
 
 function gjSave() {
@@ -73,5 +73,5 @@ function gjSave() {
     set_xp(_gj_xp);
     set_rank(_gj_rank);
 
-    close();
+    FlxG.state.closeSubState();
 }

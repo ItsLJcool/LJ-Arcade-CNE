@@ -79,18 +79,21 @@ var goingToUIstate:Bool = false;
 
 public static var switchTo_Ratings:Bool = false;
 public static var inRatings:Bool = false;
+
+public static var _extraXP:Int = 0;
+
 public static var _lastRating:String = "";
 public static var usingBotplay:Bool = false;
 function preStateSwitch() {
 
     if (inRatings) {
         inRatings = false;
-        // FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
-        // return;
+        _extraXP = 0;
+        FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
+        return;
     }
     
     FlxG.camera.bgColor = 0xFF000000;
-    trace(FlxG.game._requestedState is UIState);
     
     if (FlxG.game._requestedState is PlayState) {
         EventsData.reloadEvents();
@@ -127,6 +130,8 @@ function preStateSwitch() {
     var possibleState:Bool = true;
     if ((Type.getClass(FlxG.game._requestedState) == ModState) || (Type.getClass(FlxG.game._requestedState) == UIState)) {
         var checking = FlxG.game._requestedState.lastName;
+        var checkNull = (checking == null);
+        if (checkNull) checking = FlxG.state.scriptName;
         var checkSplit = checking.split("/");
         if (checkSplit.length > 0) {
             checking = checkSplit.pop();
@@ -134,8 +139,6 @@ function preStateSwitch() {
         }
         for (state in allStates) {
             state = Path.withoutExtension(state);
-            var checkNull = (checking == null);
-            if (checkNull) checking = FlxG.state.scriptName;
             trace(state + " | " + checking);
             if ((state == checking) || (state == (customPrefix+"."+checking))
             || (state == (customPrefix+".ui."+checking))) {
@@ -159,8 +162,6 @@ function preStateSwitch() {
         FlxG.game._requestedState = new ModState("ModMainMenu");
     }
 
-    trace("GameJolt.username: " + GameJolt.username);
-    trace("GameJolt.token: " + GameJolt.token);
 	if (!initialized) {
 		initialized = true;
         if (FlxG.save.data.GameJoltUsername != null && FlxG.save.data.GameJoltToken != null) {
@@ -180,8 +181,6 @@ function preStateSwitch() {
             if (requestedState[requestedState.length-1] == split[split.length-1]
             || (Type.getClass(FlxG.game._requestedState) == ModState) && (FlxG.game._requestedState.lastName == split[split.length-1])) {
 				FlxG.game._requestedState = (goingToUIstate) ? new UIState(true, fileName) : new ModState(fileName);
-                
-                trace(FlxG.game._requestedState is UIState);
                 return;
             }
         }
@@ -204,6 +203,7 @@ static function openQueuedSubState(state:FlxSubState, ?priority:Bool = false) {
 }
 
 static function close() {
+    trace("closing- bruh");
     if (FlxG.state.subState == null) return;
     
     if (queuedSubStates[0] != null) {
@@ -247,7 +247,9 @@ static function loadModToLibrary(modToLoad:String) {
 **/
 static function removeModFromLibrary(modToRemove) {
     if (!_loadedModAssetLibrary.exists(modToRemove)) return false;
-    Paths.assetsTree.removeLibrary(_loadedModAssetLibrary.get(modToRemove));
+    var mod = _loadedModAssetLibrary.get(modToRemove);
+    mod.unload();
+    Paths.assetsTree.removeLibrary(mod);
     _loadedModAssetLibrary.remove(modToRemove);
     return true;
 }

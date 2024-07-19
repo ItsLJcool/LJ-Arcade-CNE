@@ -6,8 +6,14 @@ function onSongEnd() {
     _lastRating = curRating.rating;
 }
 
+var _curComboHits:Int = 0;
 function onRatingUpdate(event) {
     _lastRating = event.rating.rating;
+
+    if (combo % 100 == 0 && combo != 0) {
+        _extraXP += 10;
+        trace("_extraXP: " + _extraXP);
+    }
 }
 
 function update(elapsed) {
@@ -26,5 +32,4 @@ function update(elapsed) {
 
 function new() {
     usingBotplay = false;
-    onSongEnd();
 }

@@ -27,23 +27,16 @@ function new() {
 
 if (_lastRating == "") _lastRating = "F";
 
-var xpGained:Int = rating_XP[_lastRating];
+var xpGained:Int = rating_XP[_lastRating] + _extraXP;
 var _maxRank:Int = -1;
 for (key in xpMaxLevels.keys()) _maxRank++;
 
-// set_xp(1499);
-// set_rank(5);
 var rank_data = {
     xp: get_xp(),
     rank: get_rank(),
 };
-var newRank = ((rank_data.xp + xpGained) >= xpMaxLevels[rank_data.rank]);
-var reached_max = (rank_data.rank == _maxRank);
-var newXP = (newRank) ? xpGained + (rank_data.xp - xpMaxLevels[rank_data.rank]) : (get_xp() + xpGained);
 
-set_xp(newXP);
-
-if (newRank && !reached_max) set_rank(rank_data.rank + 1);
+var newRank = update_xp(xpGained).rankedUp;
 
 var ljToken:FlxSprite;
 var ljTokenText:FlxText;

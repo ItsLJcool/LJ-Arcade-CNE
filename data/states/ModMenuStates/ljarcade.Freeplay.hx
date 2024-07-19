@@ -131,7 +131,7 @@ var songs = [];
 public function freeplayShit() {
     for (test in _loadedModAssetLibrary) { // just for support ig
         for (s in FileSystem.readDirectory(test.getPath("assets/songs"))) {
-            if (Path.extension(s) != "") continue;
+            if (Path.extension(s) != "" || !test.exists("assets/songs/"+s+"/meta.json")) continue;
             var meta = Chart.loadChartMeta(s, "normal", false);
             songs.push(meta);
         }

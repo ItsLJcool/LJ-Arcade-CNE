@@ -113,8 +113,18 @@ var tokenInput:String = "";
 
 var userTyping:Bool = false;
 var tokenTyping:Bool = false;
+
+var _resetTimer:FlxTimer;
 function update(elapsed) {
     if (FlxG.keys.justPressed.ESCAPE) FlxG.switchState(new MainMenuState());
+
+    if (FlxG.keys.justPressed.R) {
+        _resetTimer = new FlxTimer().start(1.5, function(tmr) {
+            if (!FlxG.keys.pressed.R) return;
+            openSubState(new UISubstateWindow(true, "UIWindow/ResetData"));
+        });
+    }
+    if (_resetTimer != null && FlxG.keys.justReleased.R) _resetTimer.cancel();
 
     updateTextBoxPlaceholder(elapsed);
 }

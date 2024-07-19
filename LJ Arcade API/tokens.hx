@@ -7,14 +7,26 @@ importScript("GameJolt API/old gamejolt");
 /**
     This just runs when the LJ Arcade Mod Launches, to ensure it's initalized, and to do some updates for saving ig
 **/
-public static var xpMaxLevels = [
+public var xpMaxLevels = [
     0 => 100,
     1 => 300,
     2 => 450,
     3 => 650,
     4 => 900,
     5 => 1500,
-    6 => Math.POSITIVE_INFINITY, // max becomesx Pos inf
+    6 => 1750,
+    7 => Math.POSITIVE_INFINITY, // max becomesx Pos inf
+];
+
+public var rating_XP = [
+    "S++" => 150,
+    "S" => 100,
+    "A" => 75,
+    "B" => 50,
+    "C" => 20,
+    "D" => 15,
+    "E" => 5,
+    "F" => 1,
 ];
 
 public function get_rankText(forceRank:Dynamic = null) {
@@ -27,16 +39,32 @@ public function get_rankText(forceRank:Dynamic = null) {
     return _rankText;
 }
 
-public var rating_XP = [
-    "S++" => 150,
-    "S" => 100,
-    "A" => 75,
-    "B" => 50,
-    "C" => 20,
-    "D" => 15,
-    "E" => 5,
-    "F" => 1,
-];
+public function update_xp(xpGained:Int) {
+    if (xpGained < 0) xpGained = 0;
+    var _maxRank:Int = -1;
+    
+    var rank = get_rank();
+    var xp = get_xp();
+
+    var __rankAdd:Int = 0;
+    var __newXP:Int = (xp + xpGained);
+    
+
+    for (key in xpMaxLevels.keys()) {
+        _maxRank++;
+        if (key < rank) continue;
+        if ((xp + xpGained) >= xpMaxLevels[key]) __rankAdd++;
+    }
+    rank += __rankAdd;
+    __newXP -= xpMaxLevels[(rank-1)];
+
+    if (__rankAdd > 0) {
+        set_rank(rank);
+        set_xp(__newXP);
+    }
+
+    return {newXP: __newXP, rankAdd: __rankAdd, rankedUp: (__rankAdd > 0)};
+}
 
 // returns true if desynced, false if not, so no need to take action.
 public function check_desync() {
@@ -53,6 +81,8 @@ public function check_desync() {
 }
 
 public function _resetData() {
+    trace("resetting data");
+    
     FlxG.save.data.lj_tokens = 0;
     GameJolt.setUser_Save("tokens", 0);
     
@@ -61,6 +91,8 @@ public function _resetData() {
     
     FlxG.save.data.lj_rank = 0;
     GameJolt.setUser_Save("rank", 0);
+
+    trace("data reset");
 }
 
 // --- Tokens ---
