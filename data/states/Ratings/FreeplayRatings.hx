@@ -32,8 +32,8 @@ var xpGained:Int = rating_XP[_lastRating];
 var _maxRank:Int = 0;
 for (key in xpMaxLevels.keys()) _maxRank++;
 
-set_xp(0);
-set_rank(0);
+// set_xp(0);
+// set_rank(0);
 var rank_data = {
     xp: get_xp(),
     rank: get_rank(),
