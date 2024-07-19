@@ -26,7 +26,6 @@ function new() {
 }
 
 if (_lastRating == "") _lastRating = "F";
-_lastRating = "S++";
 
 var xpGained:Int = rating_XP[_lastRating];
 var _maxRank:Int = 0;
