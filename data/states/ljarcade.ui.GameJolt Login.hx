@@ -12,6 +12,7 @@ import funkin.editors.ui.UIText;
 import funkin.editors.ui.UIUtil;
 import funkin.editors.ui.UIWindow;
 import funkin.editors.ui.UIScrollBar;
+import funkin.editors.ui.UISubstateWindow;
 
 import funkin.backend.shaders.CustomShader;
 
@@ -22,8 +23,7 @@ import flixel.group.FlxTypedSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxRect;
 
-// REDO THE GAMEJOLT API CODE TO WORK WITH NEW API
-// importScript("Temp GameJolt API/gamejolt test");
+importScript('LJ Arcade API/tokens');
 importScript("LJ Arcade API/LoadImageURL");
 var typesOfBGs = [];
 
@@ -41,14 +41,10 @@ var tokenHiddenText:UIText;
 var loginButton:UIButton;
 var logOutButton:UIButton;
 
-var gamejoltUserAvitar:FlxSprite;
-
-var gamejoltCamera:FlxCamera;
 function create() {
     grayscaleShader = new CustomShader("ljarcade.greenscale");
     if (FlxG.sound.music == null) CoolUtil.playMusic(Paths.music("logInState"), true, 1, true, 100);
-
-    FlxG.camera.bgColor = 0xFF808080;
+    FlxG.sound.music.volume = 0.5;
 
     var path = "ModMenu/bgs";
     for (funnies in FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/images/"+path)) {
@@ -96,78 +92,18 @@ function create() {
     loginButton.autoAlpha = false;
     
     logOutButton = new UIButton(0, 0, "Log Out Of GameJolt", function() {
-        GameJolt.username = "";
-        GameJolt.token = "";
+        GameJolt.username = GameJolt.token = FlxG.save.data.GameJoltUsername = FlxG.save.data.GameJoltToken = null;
         usingGameJolt = false;
     }, loginButton.bWidth, loginButton.bHeight);
     logOutButton.setPosition(tokenBox.x + tokenBox.bWidth/2 - tokenBox.bWidth/4, tokenBox.y + tokenBox.bHeight*2 + tokenBox.bHeight);
     logOutButton.y += loginButton.bHeight*1.5;
     add(logOutButton);
     logOutButton.autoAlpha = false;
-
-    profileWindow = new UIWindow(0,0, 450, FlxG.height*0.75, "GameJolt Profile");
-    profileWindow.y = FlxG.height/2 - profileWindow.bHeight/2;
-    profileWindow.x = 5;
-    profileWindow.titleSpr.y = profileWindow.y + ((30 - profileWindow.titleSpr.height) / 2);
-    profileWindow.titleSpr.x = profileWindow.x + (profileWindow.bWidth / 2) - profileWindow.titleSpr.width/4 + 30;
-    add(profileWindow);
-    
-    gamejoltCamera = new FlxCamera(profileWindow.x, profileWindow.y+profileWindow.bHeight*0.35, profileWindow.bWidth, profileWindow.bHeight*0.65);
-    // gamejoltCamera.bgColor = 0x66FF0000;
-    gamejoltCamera.bgColor = 0;
-    FlxG.cameras.add(gamejoltCamera, false);
-
-    allTrophies = new FlxTypedSpriteGroup();
-    allTrophies.cameras = [gamejoltCamera];
-    add(allTrophies);
-    
-    
-    var userData = GameJolt.get("users", [{name: "username", value: GameJolt.username}]);
-    if (userData.response.success == "true") {
-        gamejoltUserAvitar = new FlxSprite();
-        gamejoltUserAvitar.antialiasing = true;
-        gamejoltUserAvitar.width = gamejoltUserAvitar.height = 100;
-        gamejoltUserAvitar.setPosition(profileWindow.x + gamejoltUserAvitar.width*0.25, (profileWindow.y + 30) + gamejoltUserAvitar.height*0.15);
-        urlImage(userData.response.users[0].avatar_url, gamejoltUserAvitar, function(bitmap) {
-            gamejoltUserAvitar.setGraphicSize(100, 100);
-            gamejoltUserAvitar.updateHitbox();
-            gamejoltUserAvitar.setPosition(profileWindow.x + gamejoltUserAvitar.width*0.25, (profileWindow.y + 30) + gamejoltUserAvitar.height*0.15);
-        });
-        add(gamejoltUserAvitar);
-    }
-    
-    var userTrophies = GameJolt.get("trophies", [{name: "username", value: GameJolt.username}, {name: "user_token", value: GameJolt.token},]);
-    trace(userTrophies.response.success);
-    if (userTrophies.response.success == "true") {
-        for (idx in 0...userTrophies.response.trophies.length) {
-            var item = userTrophies.response.trophies[idx];
-            addTrophy(item.image_url, idx);
-        }
-    }
-
 }
 
-var profileWindow:UIWindow;
-
-var maxWidth:Int = 4;
-var offsetTrophy:Float = 50;
-var yOffset:Float = 30;
-
-var allTrophies:FlxTypedSpriteGroup;
-function addTrophy(url:String, idx) {
-    var trophy = new FlxSprite().makeGraphic(75, 75, 0xFFFFFFFF);
-    trophy.ID = idx;
-    trophy.x = (trophy.width + 15)*(idx % maxWidth) + offsetTrophy;
-    trophy.y = (trophy.height + yOffset)*Std.int(idx / maxWidth) + offsetTrophy;
-    trophy.antialiasing = true;
-    allTrophies.add(trophy);
-
-    urlImage(url, trophy, function(bitmap) {
-        trophy.setGraphicSize(75, 75);
-        trophy.updateHitbox();
-        
-        trophy.x = (trophy.width + 15)*(trophy.ID % maxWidth) + offsetTrophy;
-        trophy.y = (trophy.height + yOffset)*Std.int(trophy.ID / maxWidth) + offsetTrophy;
+function postCreate() {
+    new FlxTimer().start(0.001, function(tmr) {
+        doDesyncCheck();
     });
 }
 
@@ -193,6 +129,7 @@ function onLoginGameJolt() {
         GameJolt.username = _cacheUsername;
         GameJolt.token = tokenInput;
         usingGameJolt = true;
+        doDesyncCheck();
     } else {
         GameJolt.username = "";
         GameJolt.token = "";
@@ -257,21 +194,12 @@ function updateTextBoxPlaceholder(elapsed) {
     logOutButton.shouldPress = (usingGameJolt);
     logOutButton.alpha = FlxMath.lerp(logOutButton.alpha, (logOutButton.shouldPress) ? 1 : 0.25, elapsed*5);
     logOutButton.field.alpha = logOutButton.alpha;
+
 }
 
-// { response => 
-// { users =>
-// [{ developer_name => ItsLJcool,
-//     last_logged_in_timestamp => 1717967151, 
-//     last_logged_in => 15 minutes ago, 
-//     avatar_url => https://m.gjcdn.net/user-avatar/60/5874107-2dvg9hnh-v4.webp, 
-//     status => Active, 
-//     type => Developer, 
-//     id => 5874107, 
-//     signed_up_timestamp => 1630799253, 
-//     developer_website => , 
-//     username => ItsLJcool, 
-//     signed_up => 2 years ago, 
-//     developer_description => I am 15, I want to become a game maker :gj/innocent: }], 
-//     success => true } 
-// }
+function doDesyncCheck() {
+    var desynced = check_desync();
+    trace("Checking desync: " + desynced);
+    if (!desynced) return;
+    openSubState(new UISubstateWindow(true, "UIWindow/DesyncWindow"));
+}

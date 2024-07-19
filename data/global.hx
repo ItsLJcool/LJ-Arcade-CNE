@@ -71,10 +71,23 @@ static var modGlobalScript = null;
 static var _fromFreeplay:Bool = false;
 static var __customArgs:Array<Dynamic> = [];
 
-static var lastSelectedFreeplaySong:Int = null;
+static var lastSelectedFreeplaySong:Int = 0;
+
+static var lastSelectedMainMenu:Int = 0;
 
 var goingToUIstate:Bool = false;
+
+public static var switchTo_Ratings:Bool = false;
+public static var inRatings:Bool = false;
+public static var _lastRating:String = "";
+public static var usingBotplay:Bool = false;
 function preStateSwitch() {
+
+    if (inRatings) {
+        inRatings = false;
+        // FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
+        // return;
+    }
     
     FlxG.camera.bgColor = 0xFF000000;
     trace(FlxG.game._requestedState is UIState);
@@ -95,19 +108,32 @@ function preStateSwitch() {
             
             modGlobalScript = null;
         }
+
+        if (switchTo_Ratings) {
+            switchTo_Ratings = false;
+            inRatings = true;
+            FlxG.game._requestedState = new ModState("Ratings/FreeplayRatings");
+        }
     }
 
     if (FlxG.game._requestedState is FreeplayState) {
         _fromFreeplay = true;
+        if (inRatings) inRatings = false;
         FlxG.game._requestedState = new ModState("ModMainMenu");
     }
+    
     
     var allStates = FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/data/states");
     var possibleState:Bool = true;
     if ((Type.getClass(FlxG.game._requestedState) == ModState) || (Type.getClass(FlxG.game._requestedState) == UIState)) {
+        var checking = FlxG.game._requestedState.lastName;
+        var checkSplit = checking.split("/");
+        if (checkSplit.length > 0) {
+            checking = checkSplit.pop();
+            allStates = FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/data/states/"+checkSplit.join("/"));
+        }
         for (state in allStates) {
             state = Path.withoutExtension(state);
-            var checking = FlxG.game._requestedState.lastName;
             var checkNull = (checking == null);
             if (checkNull) checking = FlxG.state.scriptName;
             trace(state + " | " + checking);
@@ -130,7 +156,7 @@ function preStateSwitch() {
     }
     if (!possibleState) {
         trace("uh oh! Not an LJ Arcade state, get fucked!");
-        FlxG.game._requestedState = new MainMenuState();
+        FlxG.game._requestedState = new ModState("ModMainMenu");
     }
 
     trace("GameJolt.username: " + GameJolt.username);
@@ -178,12 +204,13 @@ static function openQueuedSubState(state:FlxSubState, ?priority:Bool = false) {
 }
 
 static function close() {
-    trace(FlxG.game._requestedState);
     if (FlxG.state.subState == null) return;
     
     if (queuedSubStates[0] != null) {
         var newSubState = queuedSubStates.shift();
         FlxG.state.openSubState(newSubState);
+    } else {
+        FlxG.state.closeSubState();
     }
 }
 

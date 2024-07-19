@@ -20,11 +20,11 @@ import sys.FileSystem;
 import funkin.backend.chart.Chart;
 import funkin.backend.utils.WindowUtils;
 
-
-import StringTools;
 import Type;
 import Sys;
 import funkin.options.OptionsMenu;
+
+import StringTools;
 
 importScript('LJ Arcade API/tokens');
 
@@ -34,6 +34,8 @@ public function changeFreeplaySelected(hur:Int = 0) {
     freeplaySel += hur;
     if (freeplaySel >= songs.length) freeplaySel = 0;
     if (freeplaySel < 0) freeplaySel = songs.length-1;
+    
+    changeDifficulty(0);
 
     if (hur > 0) {
         var firstPos = _cachePos.shift();
@@ -74,7 +76,7 @@ public function changeFreeplaySelected(hur:Int = 0) {
 
 var diffSel:Int = 0;
 public function changeDifficulty(hur:Int = 0) {
-    if (freeplayEntering) return;
+    if (freeplayEntering || diffSelecter == null) return;
 
     diffSel += hur;
     if (diffSel >= songs[freeplaySel].difficulties.length) diffSel = 0;
@@ -89,12 +91,18 @@ public function changeDifficulty(hur:Int = 0) {
     };
     diffSelecter.updateHitbox();
     diffSelecter.setPosition(FlxG.width/2 - diffSelecter.width/2, bottomBar.y + bottomBar.height/2 - diffSelecter.height/2);
+}
+
+function update(elapsed) {
     for (i in 0...arrowSelectors.length) {
         var spr = arrowSelectors[i];
         var x = (i > 0) ? diffSelecter.x - spr.width - 20 : diffSelecter.x + diffSelecter.width + 20;
-        spr.setPosition(x, bottomBar.y + bottomBar.height/2 - spr.height/2);
+        spr.x = FlxMath.lerp(spr.x, x, elapsed*10);
+        spr.y = FlxMath.lerp(spr.y, bottomBar.y + bottomBar.height/2 - spr.height/2, elapsed*10);
 
-        if (songs[freeplaySel].difficulties.length == 1) spr.alpha = 0.0001;
+        var beVisible = (songs[freeplaySel].difficulties.length == 1 || currentState == 0) ? true : false;
+        var alpha = (beVisible) ? 0.0001 : 1;
+        spr.alpha = FlxMath.lerp(spr.alpha, alpha, elapsed*20);
     }
 }
 
@@ -107,13 +115,9 @@ public function enterFreeplaySong() {
     lastSelectedFreeplaySong = freeplaySel;
     freeplayEntering = true;
 
-    freeplayAnimTimer.start(3.5, function(tmr) {
+    freeplayAnimTimer.start(1.5, function(tmr) {
         loadAndPlaySong(songs[freeplaySel].name, songs[freeplaySel].difficulties[diffSel]);
     });
-    for (idx in 0...songNames.length) {
-        var spr = songNames[idx];
-        FlxTween.tween(spr, {x: -songTab.width/2 + 150}, 0.75, {ease: FlxEase.quadIn, startDelay: 0.15*(idx+1)});
-    }
 }
 
 var songTab:FlxSprite;
@@ -179,7 +183,7 @@ public function freeplayShit() {
     
     _cachePos.resize(_songItems);
 
-    changeFreeplaySelected(0);
+    new FlxTimer().start(0.0001, function() { changeFreeplaySelected(0); });
 }
 
 var _songItems:Int = 11;
@@ -190,7 +194,7 @@ public function updateSongTab(sprite:FlxSprite) {
         var songItem = (i - _songCenter) + freeplaySel;
         songItem = ((songItem % songs.length) + songs.length) % songs.length; // this should be a positive modulo.
 
-        var xPos = (!freeplayEntering) ?  -150 * (i != _songCenter) :  -300 * (i != _songCenter);
+        var xPos = (!freeplayEntering) ?  -150 * (i != _songCenter) : -300 * (i != _songCenter);
 
         if (currentState != 1) xPos = -FlxG.width;
 
@@ -213,7 +217,9 @@ public function updateSongTab(sprite:FlxSprite) {
         songNames[i].scale.x = Math.min((songTab.width - 200) / songNames[i].frameWidth, 1);
         songNames[i].updateHitbox();
         
-        songNames[i].x = FlxMath.lerp(songNames[i].x, (currentState == 1 && !freeplayEntering) ? 25 : xPos, elapsedTime);
+        var positioning = (currentState == 1 && !freeplayEntering) ? 25 : xPos;
+        if ((i == _songCenter) && freeplayEntering) positioning += 25;
+        songNames[i].x = FlxMath.lerp(songNames[i].x, positioning, elapsedTime);
         songNames[i].y = _cachePos[i].y + songTab.height * 0.5 - songNames[i].height * 0.5;
         songNames[i].text = (songs[songItem].displayName != null) ? songs[songItem].displayName : songs[songItem].name;
 
@@ -226,4 +232,9 @@ public function updateSongTab(sprite:FlxSprite) {
         // this goes LAST!! in the for loop
         sprite.draw();
     }
+}
+
+function createPost() {
+    if (currentState != 1) return;
+    new FlxTimer().start(0.0001, function() { changeFreeplaySelected(0); });
 }

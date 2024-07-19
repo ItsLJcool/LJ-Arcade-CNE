@@ -28,8 +28,6 @@ import Sys;
 import funkin.options.OptionsMenu;
 importScript('LJ Arcade API/tokens');
 
-public var ref;
-
 public var levelBar:FlxBar;
 public var levelDropshadow:FlxSprite;
 
@@ -58,9 +56,6 @@ function update(elapsed) {
         optionIcon.scale.x = optionIcon.scale.y = FlxMath.lerp(optionIcon.scale.x, 1, elapsed*10);
         optionIcon.alpha = FlxMath.lerp(optionIcon.alpha, 1, elapsed*10);
     }
-
-    if (FlxG.keys.justPressed.P) ref.alpha += 0.1;
-    if (FlxG.keys.justPressed.O) ref.alpha -= 0.1;
 
     if (FlxG.keys.justPressed.ESCAPE) {
         switch(currentState) {
@@ -119,20 +114,27 @@ function stateDisplay() {
     sectionTitle.shadowOffset.y = 3;
     add(sectionTitle);
 
-    currentModText = new FlxText(0,0, 0, "[ModName]");
+    currentModText = new FlxText(0,0, 0, args[0]);
+
     currentModText.setFormat(Paths.font("goodbyeDespair.ttf"), 32, 0xFFFFFFFF, "left", FlxTextBorderStyle.SHADOW, 0xFF000000);
     currentModText.borderSize = 2;
     currentModText.shadowOffset.x = 0;
     currentModText.shadowOffset.y = 3;
     currentModText.x = sectionTitle.x + sectionTitle.width + 25;
     currentModText.y = sectionTitle.y + 5;
+
+    currentModText.scale.x = Math.min((150) / currentModText.frameWidth, 1);
+    currentModText.updateHitbox();
     add(currentModText);
 
 }
 
-public var levels = 0;
+public var rank_data = {
+    xp: get_xp(),
+    rank: get_rank(),
+};
 function levelArt() {
-    levelBar = new FlxBar(0,0, null, 350, 25, levels, "xp", 0, xpMaxLevels[levels.level]);
+    levelBar = new FlxBar(0,0, null, 350, 25, rank_data, "xp", 0, xpMaxLevels[rank_data.rank]);
     levelBar.x = FlxG.width - levelBar.width - 25;
     levelBar.y += 25;
     levelBar.createGradientBar([0xFFFFFFFF], [0xFF00FF6E, 0xFF00ff42, 0xFF00ff1e], 1, 0);
@@ -142,7 +144,7 @@ function levelArt() {
     add(levelDropshadow);
     add(levelBar);
 
-    levelText = new FlxText(0,0, 0, "Level:  "+levels.level);
+    levelText = new FlxText(0,0, 0, "Rank:  "+rank_data.rank);
     levelText.setFormat(Paths.font("goodbyeDespair.ttf"), 22, 0xFFFFFFFF, "left", FlxTextBorderStyle.SHADOW, 0xFF000000);
     levelText.borderSize = 2;
     levelText.shadowOffset.x = 0;
@@ -151,7 +153,7 @@ function levelArt() {
     add(levelText);
     
 
-    xpToLevel = new FlxText(0,0, 0, levels.xp+"/"+xpMaxLevels[levels.level]);
+    xpToLevel = new FlxText(0,0, 0, rank_data.xp+"/"+xpMaxLevels[rank_data.rank]);
     xpToLevel.setFormat(Paths.font("goodbyeDespair.ttf"), 22, 0xFFFFFFFF, "right", FlxTextBorderStyle.SHADOW, 0xFF000000);
     xpToLevel.borderSize = 2;
     xpToLevel.shadowOffset.x = 0;
@@ -219,6 +221,7 @@ function bottomShit() {
         spr.updateHitbox();
         var x = (i > 0) ? diffSelecter.x - spr.width : diffSelecter.x + diffSelecter.width;
         spr.setPosition(x, bottomBar.y + bottomBar.height/2 - spr.height/2);
+        spr.alpha = 0.0001;
         add(spr);
         arrowSelectors.push(spr);
     }
@@ -336,6 +339,7 @@ function enterMainMenu() {
 function endMenuAnimation() {
     switch(selectableNames[curSel].toLowerCase()) {
         case "freeplay":
+            changeFreeplaySelected(0);
             FlxTween.tween(diffSelecter, {alpha: 1}, 0.75, {ease:FlxEase.quadInOut});
             return;   
     }
@@ -348,8 +352,6 @@ function endMenuAnimation() {
         new FlxTimer().start(1, function() { Sys.exit(0); });
     });
 }
-
-
 
 /**
     ModMenuStates
@@ -368,7 +370,7 @@ function new() {
 }
 
 function create() {
-    initTokens();
+
     var path = "ModMenu/bgs";
     for (funnies in FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/images/"+path)) {
         if (Path.extension(funnies) != "png") continue;
@@ -411,15 +413,4 @@ function create() {
     soon.screenCenter();
     soon.alpha = 0.0001;
     add(soon);
-
-    
-    ref = new FlxSprite(0,0, Paths.image("References/mainMenuStateV2"));
-    ref.setGraphicSize(FlxG.width, FlxG.height);
-    ref.screenCenter();
-    ref.alpha = 0;
-    add(ref);
-}
-
-function postCreate() {
-    changeDifficulty(0);
 }

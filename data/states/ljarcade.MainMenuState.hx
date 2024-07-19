@@ -3,6 +3,10 @@ import funkin.backend.system.Controls;
 import funkin.backend.assets.ModsFolder;
 import funkin.menus.ModSwitchMenu;
 
+import funkin.editors.EditorPicker;
+
+import flixel.text.FlxTextBorderStyle;
+
 import sys.FileSystem;
 import haxe.io.Path;
 
@@ -37,16 +41,20 @@ function create() {
     add(new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF808080));
 
     // temp graphic, replace with something cooler pls
-    modCardSprite = new FlxSprite().makeGraphic(400, 150, 0xFFFFFFFF);
+    modCardSprite = new FlxSprite(0, 0, Paths.image("MainMenu/modcard"));
+    modCardSprite.setGraphicSize(400, 150);
+    modCardSprite.updateHitbox();
     modCardSprite.onDraw = cardUpdate;
     modCardSprite.screenCenter();
     add(modCardSprite);
     
     for (i in 0..._songItems) {
         var text = new FlxText(_cachePos[i].x, _cachePos[i].y, 0, "poggor " + i);
-        text.color = 0xFF000000;
-        text.alpha = 0.5;
-        text.setFormat(Paths.font("goodbyeDespair.ttf"), 36, 0xFF0000000, "center");
+        text.alpha = 1;
+        text.setFormat(Paths.font("Gobold Extra2.otf"), 36, 0xFFFFFFFF, "center", FlxTextBorderStyle.SHADOW, 0xFF000000);
+        text.borderSize = 3;
+        text.shadowOffset.x = 0;
+        text.shadowOffset.y = 1.5;
         add(text);
         modNames.push(text);
     }
@@ -140,7 +148,7 @@ function arcadePlay(anim, timeTransition:Int = 0.5) {
 
 
 var prevSel:Int = 0;
-var curSel:Int = 0;
+var curSel:Int = lastSelectedMainMenu;
 var enteringMod:Bool = false;
 
 
@@ -181,6 +189,7 @@ function enterModState() {
     
     trace(modsInFolder[curSel]);
     __customArgs = [modsInFolder[curSel]];
+    lastSelectedMainMenu = curSel;
     FlxG.switchState(new ModState("ModMainMenu"));
 }
 
@@ -197,7 +206,7 @@ var arcScale = 650;
 var offsetPosX = 725;
 
 var _songCenter:Int = Math.floor(_songItems * 0.5);
-var _cachePos:Array<{x:Float, y:Float}> = [for (i in 0..._songItems) {x: (offsetPosX-250) + (arcScale * Math.cos(angleStep * (i+0.3))), y: (FlxG.height * 0.5) - (150*1.25) * (i - _songCenter) + 100, alpha: 1}];
+var _cachePos:Array<{x:Float, y:Float}> = [for (i in 0..._songItems) {x: (offsetPosX-250) + (arcScale * Math.cos(angleStep * (i+0.3))), y: (FlxG.height * 0.5) - (150*1.25) * (i - _songCenter) + 100, alpha: 0.5}];
 function cardUpdate(sprite:FlxSprite) {
     for (i in 0..._songItems) {
         var songItem = (i - _songCenter) + curSel;
@@ -216,7 +225,7 @@ function cardUpdate(sprite:FlxSprite) {
 
         var alpha = (songItem != curSel) ? 0.5 : 1;
         sprite.alpha = _cachePos[i].alpha = FlxMath.lerp(_cachePos[i].alpha, alpha, FlxG.elapsed*5);
-        modNames[i].alpha = FlxMath.lerp(modNames[i].alpha, alpha*0.5, FlxG.elapsed*5);
+        modNames[i].alpha = FlxMath.lerp(modNames[i].alpha, (songItem != curSel) ? 0.8 : 1, FlxG.elapsed*5);
 
         modNames[i].x = _cachePos[i].x + sprite.width * 0.5 - modNames[i].width * 0.5;
         modNames[i].y = _cachePos[i].y + sprite.height * 0.5 - modNames[i].height * 0.5;
@@ -242,6 +251,12 @@ function postUpdate(elapsed) {
 function update(elapsed) {
     if (controls.SWITCHMOD) {
         openSubState(new ModSwitchMenu());
+        persistentUpdate = false;
+        persistentDraw = true;
+    }
+    
+    if (FlxG.keys.justPressed.SEVEN) {
+        openSubState(new EditorPicker());
         persistentUpdate = false;
         persistentDraw = true;
     }
