@@ -28,7 +28,7 @@ function new() {
 if (_lastRating == "") _lastRating = "F";
 
 var xpGained:Int = rating_XP[_lastRating];
-var _maxRank:Int = 0;
+var _maxRank:Int = -1;
 for (key in xpMaxLevels.keys()) _maxRank++;
 
 // set_xp(0);
@@ -38,11 +38,12 @@ var rank_data = {
     rank: get_rank(),
 };
 var newRank = ((rank_data.xp + xpGained) >= xpMaxLevels[rank_data.rank]);
+var reached_max = (rank_data.rank == _maxRank);
 var newXP = (newRank) ? xpGained + (rank_data.xp - xpMaxLevels[rank_data.rank]) : (get_xp() + xpGained);
 
 set_xp(newXP);
 
-if (newRank && (rank_data.rank < _maxRank)) set_rank(rank_data.rank + 1);
+if (newRank && !reached_max) set_rank(rank_data.rank + 1);
 
 var ljToken:FlxSprite;
 var ljTokenText:FlxText;
@@ -61,6 +62,7 @@ function create() {
     
     ljToken.x -= ljTokenText.width * 0.5;
     ljTokenText.x += ljToken.width * 0.5;
+
     
     levelBar = new FlxBar(0,0, null, 350, 25, rank_data, "xp", 0, xpMaxLevels[rank_data.rank]);
     levelBar.x = FlxG.width - levelBar.width - 25;
@@ -72,7 +74,7 @@ function create() {
     add(levelDropshadow);
     add(levelBar);
     
-    levelText = new FlxText(0,0, 0, "Rank:  "+rank_data.rank);
+    levelText = new FlxText(0,0, 0, get_rankText(rank_data.rank));
     levelText.setFormat(Paths.font("goodbyeDespair.ttf"), 22, 0xFFFFFFFF, "left", FlxTextBorderStyle.SHADOW, 0xFF000000);
     levelText.borderSize = 2;
     levelText.shadowOffset.x = 0;
@@ -118,14 +120,15 @@ function do_rankUp() {
             });
         };
         var _zoom = FlxG.camera.zoom;
-        FlxTween.tween(FlxG.camera, {zoom: FlxG.camera.zoom - 0.1}, 1.95, {ease: FlxEase.backIn});
+        FlxTween.tween(FlxG.camera, {zoom: FlxG.camera.zoom - 0.1}, 1.95, {ease: FlxEase.backInOut});
         FlxTween.tween(rank_data, {xp: 0}, 1.95, {ease: FlxEase.quintIn, onUpdate: updateShit, onComplete: function() {
             rank_data.rank = get_rank();
             levelBar.setRange(0, xpMaxLevels[rank_data.rank]);
             updateShit();
             bloomaMount = 0.5;
             
-            FlxTween.tween(FlxG.camera, {zoom: _zoom}, 3, {ease: FlxEase.backIn});
+            FlxTween.tween(FlxG.camera, {zoom: _zoom + 0.15}, 0.5, {ease: FlxEase.sineOut});
+            FlxTween.tween(FlxG.camera, {zoom: _zoom}, 3, {startDelay: 0.5, ease: FlxEase.backInOut});
         }});
         FlxG.sound.music.volume = _vol;
     }});
@@ -133,7 +136,7 @@ function do_rankUp() {
 }
 
 function updateShit() {
-    levelText.text = "Rank:  "+rank_data.rank;
+    levelText.text = get_rankText(rank_data.rank);
     levelText.setPosition(levelBar.x, levelBar.y + levelText.height + 10);
 
     xpToLevel.text = Std.int(rank_data.xp)+"/"+xpMaxLevels[rank_data.rank];
@@ -143,7 +146,7 @@ function updateShit() {
 var bloomaMount = 1; // stolen from YTP lmao
 function update(elapsed) {
     if (newRank) {
-        bloomaMount = FlxMath.lerp(bloomaMount, 1, elapsed*0.5);
+        bloomaMount = FlxMath.lerp(bloomaMount, 1, elapsed*0.25);
         bloom.data.dim.value = [bloomaMount, bloomaMount];
     }
     if (controls.ACCEPT) {

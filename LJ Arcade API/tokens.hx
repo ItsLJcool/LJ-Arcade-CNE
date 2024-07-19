@@ -7,14 +7,25 @@ importScript("GameJolt API/old gamejolt");
 /**
     This just runs when the LJ Arcade Mod Launches, to ensure it's initalized, and to do some updates for saving ig
 **/
-public var xpMaxLevels = [
+public static var xpMaxLevels = [
     0 => 100,
     1 => 300,
     2 => 450,
     3 => 650,
     4 => 900,
     5 => 1500,
+    6 => Math.POSITIVE_INFINITY, // max becomesx Pos inf
 ];
+
+public function get_rankText(forceRank:Dynamic = null) {
+    var _maxRank:Int = -1;
+    for (key in xpMaxLevels.keys()) _maxRank++;
+
+    var rank = (forceRank == null) ? get_rank() : Std.string(forceRank);
+    var _rankText:String = "Rank: "+rank;
+    if (Std.parseInt(rank) == _maxRank) _rankText += " (Max Rank)";
+    return _rankText;
+}
 
 public var rating_XP = [
     "S++" => 150,
