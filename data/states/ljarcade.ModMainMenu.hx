@@ -144,7 +144,7 @@ function levelArt() {
     add(levelDropshadow);
     add(levelBar);
 
-    levelText = new FlxText(0,0, 0, "Rank:  "+rank_data.rank);
+    levelText = new FlxText(0,0, 0, get_rankText());
     levelText.setFormat(Paths.font("goodbyeDespair.ttf"), 22, 0xFFFFFFFF, "left", FlxTextBorderStyle.SHADOW, 0xFF000000);
     levelText.borderSize = 2;
     levelText.shadowOffset.x = 0;

@@ -31,8 +31,8 @@ var xpGained:Int = rating_XP[_lastRating];
 var _maxRank:Int = -1;
 for (key in xpMaxLevels.keys()) _maxRank++;
 
-// set_xp(0);
-// set_rank(0);
+// set_xp(1499);
+// set_rank(5);
 var rank_data = {
     xp: get_xp(),
     rank: get_rank(),
@@ -48,6 +48,9 @@ if (newRank && !reached_max) set_rank(rank_data.rank + 1);
 var ljToken:FlxSprite;
 var ljTokenText:FlxText;
 function create() {
+    bruh = new FlxText(0,0, 0, "** RATINGS SCREEN SUBJECT TO CHANGE **");
+    bruh.setFormat(Paths.font("Funkin - No Outline.ttf"), 20, 0xFFFFFFFF, "left");
+    add(bruh);
 
     ljTokenText = new FlxText(0,0, 0, "[Tokens Gained]");
     ljTokenText.setFormat(Paths.font("Funkin - No Outline.ttf"), 36, 0xFFFFFFFF, "center");
