@@ -4,6 +4,8 @@ import flixel.text.FlxTextBorderStyle;
 import flixel.addons.display.FlxBackdrop;
 importScript("LJ Arcade API/tokens");
 
+var cheated:Bool = (usingBotplay);
+
 var cam:FlxCamera;
 function new() {
     cam = new FlxCamera();
@@ -36,7 +38,7 @@ var rank_data = {
     rank: get_rank(),
 };
 
-var newRank = update_xp(xpGained).rankedUp;
+var newRank = (cheated) ? false : update_xp(xpGained).rankedUp;
 
 var ljToken:FlxSprite;
 var ljTokenText:FlxText;
@@ -58,7 +60,6 @@ function create() {
     
     ljToken.x -= ljTokenText.width * 0.5;
     ljTokenText.x += ljToken.width * 0.5;
-
     
     levelBar = new FlxBar(0,0, null, 350, 25, rank_data, "xp", 0, xpMaxLevels[rank_data.rank]);
     levelBar.x = FlxG.width - levelBar.width - 25;

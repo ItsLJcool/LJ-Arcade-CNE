@@ -89,8 +89,8 @@ function preStateSwitch() {
     if (inRatings) {
         inRatings = false;
         _extraXP = 0;
-        FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
-        return;
+        // FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
+        // return;
     }
     
     FlxG.camera.bgColor = 0xFF000000;

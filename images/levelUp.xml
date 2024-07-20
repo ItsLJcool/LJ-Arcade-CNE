@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="levelUp.png">
+<SubTexture name="levelUpLoop0000" x="0" y="0" width="1171" height="441" frameX="-81" frameY="-90" frameWidth="1280" frameHeight="720" />
+<SubTexture name="levelUpLoop0001" x="0" y="441" width="1171" height="433" frameX="-81" frameY="-98" frameWidth="1280" frameHeight="720" />
+<SubTexture name="levelUpLoop0002" x="1171" y="0" width="1171" height="429" frameX="-81" frameY="-102" frameWidth="1280" frameHeight="720" />
+<SubTexture name="levelUpLoop0003" x="1171" y="429" width="1171" height="427" frameX="-81" frameY="-104" frameWidth="1280" frameHeight="720" />
+<SubTexture name="levelUpLoop0004" x="0" y="874" width="1171" height="427" frameX="-81" frameY="-104" frameWidth="1280" frameHeight="720" />
+<SubTexture name="levelUpLoop0005" x="1171" y="874" width="1171" height="427" frameX="-81" frameY="-104" frameWidth="1280" frameHeight="720" />
+<SubTexture name="levelUpLoop0006" x="0" y="1301" width="1171" height="427" frameX="-81" frameY="-104" frameWidth="1280" frameHeight="720" />
+<SubTexture name="levelUpLoop0007" x="0" y="1301" width="1171" height="427" frameX="-81" frameY="-104" frameWidth="1280" frameHeight="720" />
+</TextureAtlas>
