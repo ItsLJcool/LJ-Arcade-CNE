@@ -29,6 +29,9 @@ import openfl.system.Capabilities;
 import funkin.backend.utils.WindowUtils;
 
 import funkin.backend.system.FunkinRatioScaleMode;
+import funkin.backend.system.Main;
+import funkin.backend.system.MainState;
+import funkin.menus.TitleState;
 import StringTools;
 
 import funkin.editors.ui.UIState;
@@ -46,6 +49,8 @@ static var usingGameJolt = false;
 
 static var initialized:Bool = false;
 static var customPrefix = "ljarcade";
+
+public static var _forceMainMenu:Bool = false;
 
 function new() {
     _initCacheSave();
@@ -82,15 +87,19 @@ public static var inRatings:Bool = false;
 
 public static var _extraXP:Int = 0;
 
-public static var _lastRating:String = "";
+public static var _lastRating:String = null;
+public static var _songLength:Int = -1;
+
 public static var usingBotplay:Bool = false;
 function preStateSwitch() {
 
     if (inRatings) {
         inRatings = false;
+        _lastRating = null;
         _extraXP = 0;
-        // FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
-        // return;
+        _songLength = -1;
+        FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
+        return;
     }
     
     FlxG.camera.bgColor = 0xFF000000;
@@ -125,6 +134,10 @@ function preStateSwitch() {
         FlxG.game._requestedState = new ModState("ModMainMenu");
     }
     
+    if ((FlxG.game._requestedState is TitleState) && _forceMainMenu) {
+        _forceMainMenu = false;
+        FlxG.game._requestedState = new MainMenuState();
+    }
     
     var allStates = FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/data/states");
     var possibleState:Bool = true;
@@ -231,6 +244,7 @@ static function loadAndPlaySong(songName:String, diff:String = "hard", opponentM
     returns true on success, false if not added (because it already is) or on error
 **/
 static function loadModToLibrary(modToLoad:String) {
+    trace("modToLoad: " + modToLoad);
     for (mod in ModsFolder.getLoadedMods()) {
         var modSplit = mod.split("/");
         var actualMod = modSplit[modSplit.length-1];
@@ -245,11 +259,36 @@ static function loadModToLibrary(modToLoad:String) {
     @param modToRemove - [String] - The folder name of the mod to remove from the `Paths.assetTree`
     returns true on success, false if not added (because it isn't added yet) or on error
 **/
-static function removeModFromLibrary(modToRemove) {
+
+static function removeModFromLibrary(modToRemove:String) {
+    trace("modToRemove: " + modToRemove);
     if (!_loadedModAssetLibrary.exists(modToRemove)) return false;
     var mod = _loadedModAssetLibrary.get(modToRemove);
+    var removed = Paths.assetsTree.removeLibrary(mod);
     mod.unload();
-    Paths.assetsTree.removeLibrary(mod);
+    
+    // _debug_Mods(); // for debugging
+    
     _loadedModAssetLibrary.remove(modToRemove);
     return true;
+}
+
+import funkin.backend.assets.IModsAssetLibrary;
+import funkin.backend.assets.ScriptedAssetLibrary;
+function _debug_Mods() {
+    for (_mod in Paths.assetsTree.libraries) {
+		var l = _mod;
+		if (l is AssetLibrary) {
+            if (l.__proxy != null) l = l.__proxy;
+		}
+        
+		if (l is ScriptedAssetLibrary)
+			trace(Type.getClassName(Type.getClass(l))+' - '+l.scriptName+' ('+l.modName+' | '+l.libName+' | '+l.prefix+')');
+		else if (l is IModsAssetLibrary)
+			trace(Type.getClassName(Type.getClass(l))+' - '+l.modName+' - '+l.libName+' ('+l.prefix+')');
+		else
+			trace(Std.string(l));
+    }
+    
+    trace(Paths.assetsTree.libraries);
 }

@@ -1,10 +1,11 @@
 // import haxe.macro.Context;
 // import Type;
 // import flixel.text.FlxTextBorderStyle;
-
+if (_loadedModAssetLibrary != null) {
 for (modLib in _loadedModAssetLibrary) {
     if (!modLib.exists("assets/data/states/MusicBeatTransition.hx", "TEXT")) continue;
     importScript("data/states/MusicBeatTransition");
+}
 }
 
 // // ENABLE IF YOU WANNA SEE A BIT OF DEBUGGING SHITS :) //

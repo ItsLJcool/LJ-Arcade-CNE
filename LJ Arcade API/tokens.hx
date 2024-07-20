@@ -80,6 +80,37 @@ public function check_desync() {
     return false;
 }
 
+public function token_rating(rating:String) {
+    if (rating == null) return -1;
+
+    switch(rating.toLowerCase()) {
+        case "s++": return 15;
+        case "s": return 10;
+        case "a": return 8;
+        case "b": return 5;
+        case "c": return 2;
+        case "d": return 1;
+        case "e": return 0;
+        default: return -1;
+    }
+}
+
+public function token_songLength(lengthSeconds:Int) {
+    if (lengthSeconds < 50) return 0;
+    var lengthMinutes:Float = lengthSeconds / 60.0;
+    
+    // Define constants for growth
+    var k:Float = 5.0; // Adjust this constant for desired scaling
+    var n:Float = 0.5; // Adjust this constant for desired growth rate
+
+    // Exponential decay for t < 2 minutes
+    if (lengthMinutes < 2.0)
+        return Math.floor(10.0 * Math.exp(-(2.0 - lengthMinutes)));
+    else
+        // Exponential growth for t >= 2 minutes
+        return Math.floor(10.0 + k * Math.pow(lengthMinutes - 2.0, n));
+}
+
 public function _resetData() {
     trace("resetting data");
     

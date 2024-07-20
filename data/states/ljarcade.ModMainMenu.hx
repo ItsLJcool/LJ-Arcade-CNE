@@ -63,7 +63,9 @@ function update(elapsed) {
             default:
                 lastSelectedFreeplaySong = null;
                 removeModFromLibrary(args[0]); // testing, remove when done
-                FlxG.switchState(new MainMenuState());
+                _forceMainMenu = true;
+                ModsFolder.switchMod(ModsFolder.currentModFolder);
+                // FlxG.switchState(new MainMenuState());
         }
     }
     

@@ -27,22 +27,33 @@ function new() {
 	add(bg);
 }
 
-if (_lastRating == "") _lastRating = "F";
+if (_lastRating == "" || _lastRating == null) _lastRating = "F";
 
 var xpGained:Int = rating_XP[_lastRating] + _extraXP;
 var _maxRank:Int = -1;
 for (key in xpMaxLevels.keys()) _maxRank++;
 
+// set_xp(0);
+// set_rank(0);
+// set_tokens(0);
 var rank_data = {
     xp: get_xp(),
     rank: get_rank(),
+    tokens: get_tokens(),
 };
+var tokenSongLength:Int = token_songLength(_songLength);
+var tokenRating:Int = token_rating(_lastRating);
+var newTokens:Int = tokenSongLength + tokenRating;
+
+set_tokens(get_tokens() + newTokens);
 
 var newRank = (cheated) ? false : update_xp(xpGained).rankedUp;
+if (!newRank && !cheated) set_xp(rank_data.xp + xpGained);
 
 var ljToken:FlxSprite;
 var ljTokenText:FlxText;
 function create() {
+
     bruh = new FlxText(0,0, 0, "** RATINGS SCREEN SUBJECT TO CHANGE **");
     bruh.setFormat(Paths.font("Funkin - No Outline.ttf"), 20, 0xFFFFFFFF, "left");
     add(bruh);
@@ -87,6 +98,8 @@ function create() {
     xpToLevel.setPosition(levelBar.x + levelBar.width - xpToLevel.width, levelBar.y + levelText.height + 10);
     add(xpToLevel);
 
+    updateShit();
+
     doUpdateShit();
 }
 
@@ -95,6 +108,7 @@ function doUpdateShit() {
     var _xp = (newRank) ? xpMaxLevels[rank_data.rank] : (rank_data.xp + xpGained);
 
     new FlxTimer().start(1, function(tmr) {
+        FlxTween.tween(rank_data, {tokens: get_tokens() }, 1, {ease: FlxEase.sineOut});
         FlxTween.tween(rank_data, {xp: _xp }, 1.75, {ease: FlxEase.quadInOut, onUpdate: updateShit, onComplete: updateShit});
         if (newRank) do_rankUp();
     });
@@ -133,6 +147,8 @@ function do_rankUp() {
 }
 
 function updateShit() {
+    ljTokenText.text = "Tokens: " + Std.int(rank_data.tokens);
+
     levelText.text = get_rankText(rank_data.rank);
     levelText.setPosition(levelBar.x, levelBar.y + levelText.height + 10);
 

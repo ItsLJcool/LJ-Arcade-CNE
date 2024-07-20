@@ -6,16 +6,19 @@ function onSongEnd() {
     _lastRating = curRating.rating;
 }
 
+function postCreate() {
+    _songLength = inst.length*0.001;
+}
+
 var _curComboHits:Int = 0;
 function onRatingUpdate(event) {
     _lastRating = event.rating.rating;
 
-    if (combo % 100 == 0 && combo != 0) {
+    if (combo % 100 == 0 && combo != 0)
         _extraXP += 10;
-        trace("_extraXP: " + _extraXP);
-    }
 }
 
+var useBotplayLol:Bool = false;
 function update(elapsed) {
 
     if (usingBotplay) return;
@@ -32,4 +35,11 @@ function update(elapsed) {
 
 function new() {
     usingBotplay = false;
+}
+
+function onPlayerHit(event) {
+    if (usingBotplay) return;
+    var daNote = event.note;
+
+    usingBotplay = !(daNote.strumLine.__pressed[daNote.noteData]);
 }
