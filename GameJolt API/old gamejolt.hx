@@ -42,11 +42,12 @@ public static var GameJolt = {
 		GameJolt.http.request(false);
 		
 		var returnMessage = Json.parse(GameJolt.http.responseData);
-		if (returnMessage.response.success == "true") {
+		returnMessage.response.success = (returnMessage.response.success == "true");
+		if (returnMessage.response.success) {
 			FlxG.save.data.GameJoltUsername = username;
 			FlxG.save.data.GameJoltToken = token;
 		}
-		return returnMessage;
+		return returnMessage.response;
 	},
 
 	set: function(endpoint:String, params:Array<{name:String, value:String}>) {

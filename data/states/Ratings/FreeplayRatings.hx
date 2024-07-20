@@ -159,7 +159,7 @@ function updateShit() {
 var bloomaMount = 1; // stolen from YTP lmao
 function update(elapsed) {
     if (newRank) {
-        bloomaMount = FlxMath.lerp(bloomaMount, 1, elapsed*0.25);
+        bloomaMount = FlxMath.lerp(bloomaMount, 1, elapsed*0.15);
         bloom.data.dim.value = [bloomaMount, bloomaMount];
     }
     if (controls.ACCEPT) {

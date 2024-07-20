@@ -42,6 +42,7 @@ var loginButton:UIButton;
 var logOutButton:UIButton;
 
 function create() {
+    usingGameJolt = GameJolt.auth(FlxG.save.data.GameJoltUsername, FlxG.save.data.GameJoltToken).success;
     grayscaleShader = new CustomShader("ljarcade.greenscale");
     if (FlxG.sound.music == null) CoolUtil.playMusic(Paths.music("logInState"), true, 1, true, 100);
     FlxG.sound.music.volume = 0.5;

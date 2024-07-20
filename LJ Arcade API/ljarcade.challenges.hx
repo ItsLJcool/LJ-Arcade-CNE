@@ -4,7 +4,7 @@
     Internal Variables, changable so that mods can have even more difficulty levels if
 **/
 var _minDiff:Int = 1;
-var _maxDiff:Int = 5; // changable in the future
+var _maxDiff:Int = 3; // changable in the future
 public function new_challenge(name:String, ?diff:Int = 1) {
     if (diff == null) diff = 1;
     // because classes are unstable until rev+428-55
@@ -56,14 +56,36 @@ public static var songSpecific_Challenges:Map<String, Map<Int, Dynamic>> = [
 ];
 
 var replace_strings:Array<String> = [
-    "${song_name}"
+    "${song_name}", 
 ];
 
-function get_random_global(?exclude:Array<Int>) {
+function get_random_global(songName:String, ?exclude:Array<Int>) {
     if (exclude == null) exclude = [];
     var _length = 0;
     for (key in global_Challenges.keys()) _length++;
-    var challenge = global_Challenges[FlxG.random.int(0, _length, exclude)];
+    var _random = FlxG.random.int(0, _length, exclude);
+    var challenge = global_Challenges[_random];
 
-    return challenge;
+    for (_replace in replace_strings) {
+        challenge = switch(_replace) {
+            case replace_strings[0]: StringTools.replace(challenge, _replace, songName);
+            default: challenge;
+        };
+    }
+
+    return {challenge: challenge, _random: _random};
+
+}
+
+function get_random_songSpecific(songName:String, ?exclude:Array<Int>) {
+    if (exclude == null) exclude = [];
+    var _length = 0;
+    for (key in songSpecific_Challenges.keys()) _length++;
+    var _random = FlxG.random.int(0, _length, exclude);
+    var challenge = songSpecific_Challenges[songName][_random];
+
+    for (_replace in replace_strings)
+        challenge = StringTools.replace(challenge, _replace, songName);
+
+    return {challenge: challenge, _random: _random};
 }
