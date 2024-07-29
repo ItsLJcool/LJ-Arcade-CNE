@@ -33,6 +33,8 @@ import funkin.backend.system.Main;
 import funkin.backend.system.MainState;
 import funkin.menus.TitleState;
 import StringTools;
+import funkin.game.PlayState;
+import funkin.game.ComboRating;
 
 import funkin.editors.ui.UIState;
 
@@ -87,17 +89,25 @@ public static var inRatings:Bool = false;
 
 public static var _extraXP:Int = 0;
 
+var _reset_data_ratings = {
+    lastRating: null,
+    songLength: -1,
+    extraXP: 0,
+    score: 0,
+    comboRatings: [new ComboRating(0, "[N/A]", 0xFF888888)],
+};
+public static var ratings_data = _reset_data_ratings;
 public static var _lastRating:String = null;
 public static var _songLength:Int = -1;
 
 public static var usingBotplay:Bool = false;
 function preStateSwitch() {
 
-    if (inRatings) {
+    if (inRatings && false) {
         inRatings = false;
-        _lastRating = null;
-        _extraXP = 0;
-        _songLength = -1;
+        ratings_data = _reset_data_ratings;
+        
+        _fromFreeplay = true;
         FlxG.game._requestedState = new ModState("ljarcade.ModMainMenu");
         return;
     }
@@ -182,7 +192,7 @@ function preStateSwitch() {
             GameJolt.token = FlxG.save.data.GameJoltToken;
             usingGameJolt = true;
         }
-		//FlxG.game._requestedState = new ModState('WarningState');
+		// FlxG.game._requestedState = new ModState('WarningState');
 	} else {
         for (state in allStates) {
             var fileName = Path.withoutExtension(state);
@@ -264,8 +274,8 @@ static function removeModFromLibrary(modToRemove:String) {
     trace("modToRemove: " + modToRemove);
     if (!_loadedModAssetLibrary.exists(modToRemove)) return false;
     var mod = _loadedModAssetLibrary.get(modToRemove);
-    var removed = Paths.assetsTree.removeLibrary(mod);
     mod.unload();
+    var removed = Paths.assetsTree.removeLibrary(mod);
     
     // _debug_Mods(); // for debugging
     

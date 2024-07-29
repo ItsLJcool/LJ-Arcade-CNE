@@ -2,6 +2,8 @@
 import funkin.backend.system.Controls;
 import funkin.backend.assets.ModsFolder;
 import funkin.menus.ModSwitchMenu;
+// import flixel.addons.ui.FlxUI9SliceSprite;
+import flixel.util.FlxSpriteUtil;
 
 import funkin.editors.EditorPicker;
 
@@ -14,7 +16,7 @@ import StringTools;
 
 var modsInFolder:Array<String> = [];
 
-var modCardSprite:FlxSprite;
+var modCardSprite;
 
 var modNames:Array<FlxText> = [];
 
@@ -269,12 +271,8 @@ function update(elapsed) {
 
     if (controls.ACCEPT) enterModState();
 
-    if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP) {
-        changeSelected(1);
-    }
-    if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.DOWN) {
-        changeSelected(-1);
-    }
+    if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP) changeSelected(1);
+    if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.DOWN) changeSelected(-1);
 
     if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT) doFunnyTest();
 
@@ -287,7 +285,7 @@ function update(elapsed) {
     }
 
     // if (FlxG.keys.justPressed.L) 
-    //     FlxG.switchState(new ModState("TestAPI"));
+    //     FlxG.switchState(new ModState("TestAPI")); 
 }
 
 function doFunnyTest() {

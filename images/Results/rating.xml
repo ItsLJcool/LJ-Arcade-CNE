@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Created with Funkin Packer v0.1.3 https://neeeoo.github.io/funkin-packer/
+-->
+<TextureAtlas imagePath="texture.png" width="1500" height="900">
+	<SubTexture name="A" x="409" y="416" width="339" height="400" rotated="true" frameX="-0" frameY="-0" frameWidth="400" frameHeight="339"/>
+	<SubTexture name="B" x="780" y="3" width="355" height="399" rotated="true" frameX="-2" frameY="-0" frameWidth="404" frameHeight="355"/>
+	<SubTexture name="C" x="1138" y="3" width="355" height="370" rotated="true" frameX="-3" frameY="-0" frameWidth="373" frameHeight="355"/>
+	<SubTexture name="D" x="409" y="3" width="368" height="410" rotated="true" frameX="-0" frameY="-0" frameWidth="410" frameHeight="368"/>
+	<SubTexture name="E" x="3" y="461" width="403" height="399" frameX="-0" frameY="-0" frameWidth="404" frameHeight="399"/>
+	<SubTexture name="F" x="3" y="3" width="403" height="455" rotated="true" frameX="-1" frameY="-0" frameWidth="456" frameHeight="403"/>
+	<SubTexture name="S" x="751" y="416" width="368" height="399" rotated="true" frameX="-0" frameY="-0" frameWidth="400" frameHeight="368"/>
+	<SubTexture name="Minus" x="1375" y="376" width="92" height="221" rotated="true" frameX="-6" frameY="-0" frameWidth="232" frameHeight="92"/>
+	<SubTexture name="Plus" x="1138" y="376" width="234" height="229" frameX="-6" frameY="-0" frameWidth="240" frameHeight="229"/>
+</TextureAtlas>

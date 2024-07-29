@@ -100,8 +100,6 @@ function update(elapsed) {
         }
     }
 
-    if (FlxG.keys.justPressed.R) ModsFolder.reloadMods();
-
 }
 
 // lj is blue // srt grrr
@@ -372,7 +370,6 @@ function new() {
 }
 
 function create() {
-
     var path = "ModMenu/bgs";
     for (funnies in FileSystem.readDirectory(ModsFolder.modsPath+ModsFolder.currentModFolder+"/images/"+path)) {
         if (Path.extension(funnies) != "png") continue;
@@ -381,9 +378,7 @@ function create() {
     }
     // TODO: In LJ Arcade folder in the mod your in, add those images as well
     // and they can toggle priority on or off, or just disable default and only have mod specific.
-
     FlxG.mouse.visible = true;
-    FlxG.camera.bgColor = 0xFF808080;
 
     background = new FlxTypedSpriteGroup();
     add(background);

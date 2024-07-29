@@ -3,19 +3,21 @@
 function onSongEnd() {
     trace("onSongEnd");
     switchTo_Ratings = true;
-    _lastRating = curRating.rating;
+    ratings_data.lastRating = (curRating == null) ? "F" : curRating.rating;
+    ratings_data.score += songScore;
+    ratings_data.comboRatings = comboRatings;
 }
 
 function postCreate() {
-    _songLength = inst.length*0.001;
+    ratings_data.songLength = inst.length*0.001;
 }
 
 var _curComboHits:Int = 0;
 function onRatingUpdate(event) {
-    _lastRating = event.rating.rating;
+    ratings_data.lastRating = event.rating.rating;
 
     if (combo % 100 == 0 && combo != 0)
-        _extraXP += 10;
+        ratings_data.extraXP += 10;
 }
 
 var useBotplayLol:Bool = false;
@@ -35,6 +37,7 @@ function update(elapsed) {
 
 function new() {
     usingBotplay = false;
+    onSongEnd();
 }
 
 function onPlayerHit(event) {
