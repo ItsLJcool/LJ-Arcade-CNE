@@ -53,7 +53,16 @@ function new() {
 }
 
 if (ratings_data.lastRating == "" || ratings_data.lastRating == null) ratings_data.lastRating = "F";
-if (ratings_data.comboRatings == null || ratings_data.comboRatings.length == 0) ratings_data.comboRatings = [new ComboRating(0, "[N/A]", 0xFF888888)];
+if (ratings_data.comboRatings == null || ratings_data.comboRatings.length == 0) ratings_data.comboRatings = [
+    new ComboRating(0, "F", 0xFFFF4444),
+    new ComboRating(0.5, "E", 0xFFFF8844),
+    new ComboRating(0.7, "D", 0xFFFFAA44),
+    new ComboRating(0.8, "C", 0xFFFFFF44),
+    new ComboRating(0.85, "B", 0xFFAAFF44),
+    new ComboRating(0.9, "A", 0xFF88FF44),
+    new ComboRating(0.95, "S", 0xFF44FFFF),
+    new ComboRating(1, "S++", 0xFF44FFFF),
+];
 
 var xpGained:Int = rating_XP[ratings_data.lastRating] + ratings_data.extraXP;
 xpGained = 150;
@@ -177,7 +186,7 @@ function setRating(type:String, ?addons:Array<String> = []) {
     noteColorShader.r = r/255;
     noteColorShader.g = g/255;
     noteColorShader.b = b/255;
-    _ratingSprite_data[0].anim = type.toUpperCase();
+    _ratingSprite_data = [{anim: type.toUpperCase(), x: 0, y: 0}];
 
     for (data in addons) {
         _ratingSprite_data.push({anim: data.toUpperCase(),
@@ -242,7 +251,12 @@ function do_rankUp() {
             rank_data.rank = get_rank();
             levelBar.setRange(0, xpMaxLevels[rank_data.rank]);
             updateShit();
-            bloomaMount = 0.5;
+            bloomaMount = 0.65;
+            
+            var _ratingPog = ratings_data.lastRating.split("");
+            var theRating = _ratingPog.shift(0, 1);
+            _ratingPog.push("+");
+            setRating(theRating, _ratingPog);
             
             FlxTween.tween(FlxG.camera, {zoom: _zoom + 0.15}, 0.5, {ease: FlxEase.sineOut});
             FlxTween.tween(FlxG.camera, {zoom: _zoom}, 3, {startDelay: 0.5, ease: FlxEase.backInOut});
@@ -266,6 +280,9 @@ function update(elapsed) {
         bloomaMount = FlxMath.lerp(bloomaMount, 1, elapsed*0.15);
         bloom.data.dim.value = [bloomaMount, bloomaMount];
     }
+
+    if (FlxG.keys.justPressed.F) 
+        setRating("F", ["+", "-"]);
     if (controls.ACCEPT) {
         FlxG.sound.music.stop();
         FlxG.sound.music = null;
