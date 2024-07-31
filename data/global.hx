@@ -90,15 +90,12 @@ public static var inRatings:Bool = false;
 public static var _extraXP:Int = 0;
 
 var _reset_data_ratings = {
-    lastRating: null,
-    songLength: -1,
+    songsData: null,
+    comboRatings: null,
     extraXP: 0,
-    score: 0,
-    comboRatings: [new ComboRating(0, "[N/A]", 0xFF888888)],
+    difficulty: null,
 };
 public static var ratings_data = _reset_data_ratings;
-public static var _lastRating:String = null;
-public static var _songLength:Int = -1;
 
 public static var usingBotplay:Bool = false;
 function preStateSwitch() {
@@ -133,8 +130,11 @@ function preStateSwitch() {
 
         if (switchTo_Ratings) {
             switchTo_Ratings = false;
-            inRatings = true;
-            FlxG.game._requestedState = new ModState("Ratings/FreeplayRatings");
+            if (ratings_data.songsData == null || ratings_data.songsData.length == 0) {}
+            else {
+                inRatings = true;
+                FlxG.game._requestedState = new ModState("Ratings/FreeplayRatings");
+            }
         }
     }
 

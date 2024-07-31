@@ -5,10 +5,17 @@ import flixel.addons.display.FlxBackdrop;
 import flixel.group.FlxTypedSpriteGroup;
 import flixel.util.FlxGradient;
 import funkin.game.PlayState;
+import Float;
+import Int;
+import String;
 import funkin.game.ComboRating;
+import funkin.backend.system.Control; // importing the Enum for usage
 importScript("LJ Arcade API/tokens");
 
-var cheated:Bool = (usingBotplay);
+var _ratingSongsData:Array<Dynamic> = ratings_data.songsData;
+if (_ratingSongsData.length == 0) leaveRatings();
+
+var cheated:Bool = (usingBotplay && false);
 
 var cam:FlxCamera;
 
@@ -50,24 +57,72 @@ function new() {
     bruh.shadowOffset.x = 0;
     bruh.shadowOffset.y = 2;
     add(bruh);
+
+    for (data in _ratingSongsData)  {
+        allScore += data.songScore;
+
+        averageSongLength += data.instLength;
+
+        averageAccuracy += data.accuracy;
+        for (ratingKeys in data.notes_rating_hit.keys()) notes_rating_hit.set(ratingKeys, data.notes_rating_hit.get(ratingKeys));
+    }
+    averageSongLength /= _ratingSongsData.length;
+
+    averageAccuracy /= _ratingSongsData.length;
+    if (averageAccuracy >= 1) properXPvalue = 1;
+    else {
+        var _array = rating_XP.keys().array;
+        _array.sort(function(a:Int, b:Int):Int { return a - b; });
+        for (accKeys in _array) {
+            var _newKeys = accKeys * 0.01;
+            if (averageAccuracy > _newKeys) continue;
+            properXPvalue = rating_XP[accKeys];
+            break;
+        }
+    }
+
+    for (data in ratings_data.comboRatings) {
+        if (averageAccuracy > data.percent) continue;
+        _lastRating = data.rating;
+        break;
+    }
+
+    xpGained = properXPvalue + ratings_data.extraXP;
+
+    var tokenSongLength:Int = token_songLength(averageSongLength);
+    var tokenRating:Int = token_rating(averageAccuracy);
+    var newTokens:Int = tokenSongLength + tokenRating;
+
+    if (!cheated) set_tokens(get_tokens() + newTokens);
+
+    newRank = (cheated) ? false : update_xp(xpGained).rankedUp;
+    if (!newRank && !cheated) set_xp(rank_data.xp + xpGained);
 }
 
-if (ratings_data.lastRating == "" || ratings_data.lastRating == null) ratings_data.lastRating = "F";
-if (ratings_data.comboRatings == null || ratings_data.comboRatings.length == 0) ratings_data.comboRatings = [
-    new ComboRating(0, "F", 0xFFFF4444),
-    new ComboRating(0.5, "E", 0xFFFF8844),
-    new ComboRating(0.7, "D", 0xFFFFAA44),
-    new ComboRating(0.8, "C", 0xFFFFFF44),
-    new ComboRating(0.85, "B", 0xFFAAFF44),
-    new ComboRating(0.9, "A", 0xFF88FF44),
-    new ComboRating(0.95, "S", 0xFF44FFFF),
-    new ComboRating(1, "S++", 0xFF44FFFF),
+var notes_rating_hit:Map<String, Int> = [
+    "sick" => 0,
+    "good" => 0,
+    "bad" => 0,
+    "shit" => 0,
+    "misses" => 0,
 ];
+var _ratingsColor:Map<String, Int> = [
+    "sick" => 0xFF22F70F,
+    "good" => 0xFF17E0D9,
+    "bad" => 0xFFFFFF00,
+    "shit" => 0xFF890000,
+    "misses" => 0xFF222222,
+];
+var ratings_piority:Array<String> = ["sick", "good", "bad", "shit", "misses"];
 
-var xpGained:Int = rating_XP[ratings_data.lastRating] + ratings_data.extraXP;
-xpGained = 150;
-var _maxRank:Int = -1;
-for (key in xpMaxLevels.keys()) _maxRank++;
+var averageSongLength:Float = 0;
+var allScore:Float = 0;
+var averageAccuracy:Float = 0;
+var properXPvalue:Float = 0;
+
+var _lastRating:String = "F";
+var xpGained:Int = 0;
+var newRank:Bool = false;
 
 // set_xp(0);
 // set_rank(0);
@@ -77,14 +132,6 @@ var rank_data = {
     rank: get_rank(),
     tokens: get_tokens(),
 };
-var tokenSongLength:Int = token_songLength(ratings_data.songLength);
-var tokenRating:Int = token_rating(ratings_data.lastRating);
-var newTokens:Int = tokenSongLength + tokenRating;
-
-set_tokens(get_tokens() + newTokens);
-
-var newRank = (cheated) ? false : update_xp(xpGained).rankedUp;
-if (!newRank && !cheated) set_xp(rank_data.xp + xpGained);
 
 var ratingSprite:FlxSprite;
 var _ratingSprite_data = [
@@ -93,6 +140,8 @@ var _ratingSprite_data = [
 var _ratingSprite_pos = {x: 0, y: 0};
 
 var scoreText:FlxText;
+
+var ratingsGroup:FlxTypedSpriteGroup;
 function create() {
 
     scoreText = new FlxText(0,0, 0, "Score: 0");
@@ -141,8 +190,25 @@ function create() {
             sprite.draw();
         }
     };
+
+    ratingsGroup = new FlxTypedSpriteGroup();
+    add(ratingsGroup);
+
+    for (ratingShit in ratings_piority) {
+        if (!notes_rating_hit.exists(ratingShit)) continue;
+        var ratingText:FlxText = new FlxText(0,0, FlxG.width/2, capitalizeFirstLetter(ratingShit)+": "+notes_rating_hit.get(ratingShit));
+        ratingText.setFormat(Paths.font("HELVETICA NEUE.TTF"), 36, _ratingsColor.get(ratingShit), "right", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+        // ratingText.x = FlxG.width - ratingText.width - 15;
+        ratingText.x = FlxG.width + ratingText.width;
+        if (ratingsGroup.members.length > 0)
+            ratingText.y = ratingsGroup.members[ratingsGroup.members.length-1].y + ratingText.height + 7.5;
+        ratingText.ID = ratingsGroup.members.length;
+        ratingsGroup.add(ratingText);
+        ratingText.borderSize = 3;
+    }
+    ratingsGroup.y = FlxG.height * 0.5 - ratingsGroup.height * 0.5;
     
-    var _ratingPog = ratings_data.lastRating.split("");
+    var _ratingPog = _lastRating.split("");
     var theRating = _ratingPog.shift(0, 1);
     setRating(theRating, _ratingPog);
 
@@ -151,8 +217,23 @@ function create() {
 
     updateShit();
 
+    trace("allScore: " + allScore);
     new FlxTimer().start(1, startScoreDisplay);
     // doUpdateShit();
+}
+
+var leaveButton:FlxText;
+function postCreate() {
+    var _acceptButton = controls.getKeyName(Control.ACCEPT);
+    leaveButton = new FlxText(0,0, 0, "Press ["+_acceptButton+"] to leave");
+    leaveButton.setFormat(Paths.font("HELVETICA NEUE.TTF"), 16, 0xFFFFFFFF, "center", FlxTextBorderStyle.SHADOW, 0xFF000000);
+    leaveButton.borderSize = 3;
+    leaveButton.shadowOffset.x = 0;
+    leaveButton.shadowOffset.y = 1.5;
+    leaveButton.x = FlxG.width - leaveButton.width - 15;
+    leaveButton.y = FlxG.height - leaveButton.height - 15;
+    leaveButton.alpha = 0.0001;
+    add(leaveButton);
 }
 
 var noteColorShader:CustomShader = new CustomShader("ljarcade.ColoredNoteShader");
@@ -196,21 +277,22 @@ function setRating(type:String, ?addons:Array<String> = []) {
 
 }
 
-if (ratings_data.score == null) ratings_data.score = 0;
 function startScoreDisplay() {
     var gradientPosX = (flip_score) ? 0 : FlxG.width - bottomGradient.width;
     var scorePosX = (flip_score) ? 50 : FlxG.width - scoreText.width - 50;
     FlxTween.tween(bottomGradient, {x: gradientPosX}, Conductor.crochet / 500, {ease: FlxEase.quadOut});
-    FlxTween.tween(scoreText, {x: scorePosX}, Conductor.crochet / 250, {ease: FlxEase.quintOut, onComplete: function() {
-
-        FlxTween.tween(_score, {theScore: ratings_data.score}, Conductor.crochet / 250,
+    FlxTween.tween(scoreText, {x: scorePosX}, Conductor.crochet / 250, {ease: FlxEase.quintOut});
+    new FlxTimer().start(Conductor.crochet / 250, function(tmr) {
+        FlxTween.tween(_score, {theScore: allScore}, Conductor.crochet / 250,
         {startDelay: 0, ease: FlxEase.sineInOut, onUpdate: updateScoreText, onComplete: updateScoreText});
+        
+        for (spr in ratingsGroup.members)
+            FlxTween.tween(spr, {x: FlxG.width - spr.width - 15}, 3, {startDelay: 0.05*(spr.ID), ease: FlxEase.backInOut});
 
         new FlxTimer().start(Conductor.crochet / 250 + 0.15, function(tmr) {
             FlxTween.tween(_ratingSprite_pos, {x: ratingSprite.width*0.125}, 1.5, {ease: FlxEase.quadInOut, onComplete: doUpdateShit });
         });
-
-    }});
+    });
 }
 
 var _score = { theScore: 0, };
@@ -224,7 +306,10 @@ function doUpdateShit() {
 
     new FlxTimer().start(1, function(tmr) {
         FlxTween.tween(rank_data, {tokens: get_tokens() }, 1, {ease: FlxEase.sineOut});
-        FlxTween.tween(rank_data, {xp: _xp }, 1.75, {ease: FlxEase.quadInOut, onUpdate: updateShit, onComplete: updateShit});
+        FlxTween.tween(rank_data, {xp: _xp }, 1.75, {ease: FlxEase.quadInOut, onUpdate: updateShit, onComplete: function() {
+            updateShit();
+            if (!newRank) allowedToLeave();
+        }});
         if (newRank) do_rankUp();
     });
 }
@@ -243,6 +328,8 @@ function do_rankUp() {
             new FlxTimer().start(0.25, function(tmr) {
                 FlxTween.tween(rank_data, {xp: get_xp() }, 1, {ease: FlxEase.quadInOut, onUpdate: updateShit, onComplete: updateShit});
                 CoolUtil.playMusic(Paths.music("Results/resultsEXCELLENT/resultsEXCELLENT"), false, 1, true, 112);
+
+                allowedToLeave();
             });
         };
         var _zoom = FlxG.camera.zoom;
@@ -253,7 +340,7 @@ function do_rankUp() {
             updateShit();
             bloomaMount = 0.65;
             
-            var _ratingPog = ratings_data.lastRating.split("");
+            var _ratingPog = _lastRating.split("");
             var theRating = _ratingPog.shift(0, 1);
             _ratingPog.push("+");
             setRating(theRating, _ratingPog);
@@ -281,20 +368,27 @@ function update(elapsed) {
         bloom.data.dim.value = [bloomaMount, bloomaMount];
     }
 
-    if (FlxG.keys.justPressed.F) 
-        setRating("F", ["+", "-"]);
-    if (controls.ACCEPT) {
-        FlxG.sound.music.stop();
-        FlxG.sound.music = null;
-        FlxG.switchState(new ModState("ModMainMenu"));
+    if (canLeave) {
+        if (controls.ACCEPT) leaveRatings();
+        var sinFunc = 0.45 + (Math.sin(Conductor.songPosition / 500) * 0.35);
+        leaveButton.alpha = FlxMath.lerp(leaveButton.alpha, sinFunc, elapsed*10);
     }
 }
 
-function colorToShaderVec(color:Int, ?rgbUh:Bool = false) {
-    if (color == null) return;
-	if (rgbUh == null) rgbUh = false;
-	var r = (color >> 16) & 0xff;
-	var g = (color >> 8) & 0xff;
-	var b = (color & 0xff);
-	return (rgbUh) ? {r: r, g: g, b: b, a: (color >> 24) & 0xff} : [(r)/100, (g)/100, (b)/100];
+function leaveRatings() {
+    FlxG.sound.music.stop();
+    FlxG.sound.music = null;
+    FlxG.switchState(new ModState("ModMainMenu"));
+}
+
+var canLeave:Bool = false;
+function allowedToLeave() {
+    FlxTween.tween(leaveButton, {alpha: 1}, Conductor.crochet / 1000, {ease: FlxEase.quadInOut, onComplete: function() {
+        canLeave = true;
+    }});
+}
+
+function capitalizeFirstLetter(s: String) {
+    if (s.length == 0) return s; // Return the string as is if it's empty
+    return s.substr(0, 1).toUpperCase() + s.substr(1, s.length - 1).toLowerCase();
 }

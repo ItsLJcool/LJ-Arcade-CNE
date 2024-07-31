@@ -18,15 +18,16 @@ public var xpMaxLevels = [
     7 => Math.POSITIVE_INFINITY, // max becomesx Pos inf
 ];
 
-public var rating_XP = [
-    "S++" => 150,
-    "S" => 100,
-    "A" => 75,
-    "B" => 50,
-    "C" => 20,
-    "D" => 15,
-    "E" => 5,
-    "F" => 1,
+// * 0.01 because aparently Hscript cant have floats AND ints as keys, killing myself
+public var rating_XP:Map<Int, Int> = [
+    100 => 150,
+    95 => 100,
+    90 => 75,
+    85 => 50,
+    80 => 20,
+    70 => 15,
+    50 => 5,
+    0 => 1,
 ];
 
 public function get_rankText(forceRank:Dynamic = null) {
@@ -80,19 +81,17 @@ public function check_desync() {
     return false;
 }
 
-public function token_rating(rating:String) {
-    if (rating == null) return -1;
+public function token_rating(rating:Float) {
 
-    switch(rating.toLowerCase()) {
-        case "s++": return 15;
-        case "s": return 10;
-        case "a": return 8;
-        case "b": return 5;
-        case "c": return 2;
-        case "d": return 1;
-        case "e": return 0;
-        default: return -1;
-    }
+    if (rating >= 1) return 15;
+    else if (rating > 0.95) return 10;
+    else if (rating > 0.9) return 8;
+    else if (rating > 0.85) return 5;
+    else if (rating > 0.8) return 2;
+    else if (rating > 0.7) return 1;
+    else if (rating > 0.5) return 0;
+    else return -1; // got an F, lmao get fucked, -1 token
+
 }
 
 public function token_songLength(lengthSeconds:Int) {
