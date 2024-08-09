@@ -4,6 +4,15 @@ import Type;
 import StringTools;
 // REDO THE GAMEJOLT API CODE TO WORK WITH NEW API
 importScript("GameJolt API/old gamejolt");
+
+public function _initCacheSave() {
+	if (FlxG.save.data.lj_tokens == null) FlxG.save.data.lj_tokens = 0;
+
+	if (FlxG.save.data.lj_xp == null) FlxG.save.data.lj_xp = 0;
+	if (FlxG.save.data.lj_level == null) FlxG.save.data.lj_level = 0;
+	if (FlxG.save.data.lj_rank == null) FlxG.save.data.lj_rank = 0;
+    FlxG.save.flush();
+}
 /**
     This just runs when the LJ Arcade Mod Launches, to ensure it's initalized, and to do some updates for saving ig
 **/
@@ -140,6 +149,7 @@ public function set_tokens(value:Int, ?forceCache:Bool = false) { if (forceCache
     value = Std.int(value);
     if (forceCache || !usingGameJolt) {
         FlxG.save.data.lj_tokens = Std.int(value); // force int in case.. ig?
+        FlxG.save.flush();
         return FlxG.save.data.lj_tokens;
     }
 
@@ -165,6 +175,7 @@ public function set_xp(value:Int, ?forceCache:Bool = false) { if (forceCache == 
     value = Std.int(value);
     if (forceCache || !usingGameJolt) {
         FlxG.save.data.lj_xp = Std.int(value); // in case.. ig?
+        FlxG.save.flush();
         return FlxG.save.data.lj_xp;
     }
 
@@ -191,6 +202,7 @@ public function set_rank(value:Int, ?forceCache:Bool = false) { if (forceCache =
     value = Std.int(value);
     if (forceCache || !usingGameJolt) {
         FlxG.save.data.lj_rank = Std.int(value); // in case.. ig?
+        FlxG.save.flush();
         return FlxG.save.data.lj_rank;
     }
 

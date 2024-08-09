@@ -15,7 +15,7 @@ importScript("LJ Arcade API/tokens");
 var _ratingSongsData:Array<Dynamic> = ratings_data.songsData;
 if (_ratingSongsData.length == 0) leaveRatings();
 
-var cheated:Bool = (usingBotplay && false);
+var cheated:Bool = (usingBotplay);
 
 var cam:FlxCamera;
 
@@ -170,7 +170,7 @@ function create() {
 
     ratingSprite = new FlxSprite();
     ratingSprite.frames = Paths.getSparrowAtlas('Results/rating');
-    for (rating in ["F", "D", "C", "B", "A", "S"]) 
+    for (rating in ["F", "E", "D", "C", "B", "A", "S"]) 
         ratingSprite.animation.addByPrefix(rating, rating, 1, true);
     ratingSprite.animation.addByPrefix('-', "Minus", 1, true);
     ratingSprite.animation.addByPrefix('+', "Plus", 1, true);

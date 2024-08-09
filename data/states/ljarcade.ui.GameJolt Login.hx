@@ -135,8 +135,8 @@ function onLoginGameJolt() {
     var _cacheToken = tokenInput;
 
     var userAuth = GameJolt.auth(_cacheUsername, _cacheToken);
-    trace("Auth: "+userAuth.response.success);
-    if (userAuth.response.success == "true" || userAuth.response.success == true) {
+    trace("Auth: "+userAuth.success);
+    if (userAuth.success == "true" || userAuth.success == true) {
         GameJolt.username = _cacheUsername;
         GameJolt.token = tokenInput;
         usingGameJolt = true;

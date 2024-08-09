@@ -39,10 +39,20 @@ public var background:FlxTypedSpriteGroup;
 **/
 public var typesOfBGs = [];
 
-public var currentState = (_fromFreeplay) ? 1 : 0;
+public var currentState = 0;
+if (_fromFreeplay) {
+    _fromFreeplay = false;
+    currentState = 1;
+}
+_fromChallenges = true;
+if (_fromChallenges) {
+    _fromChallenges = false;
+    currentState = 2;
+}
 
 public var soon:FlxText;
 public var args = __customArgs;
+public var modName:String = args[0];
 
 function update(elapsed) {
     
@@ -57,46 +67,47 @@ function update(elapsed) {
         optionIcon.alpha = FlxMath.lerp(optionIcon.alpha, 1, elapsed*10);
     }
 
-    if (FlxG.keys.justPressed.ESCAPE) {
+    if (controls.BACK) {
         switch(currentState) {
-            case 1: toMainMenu();
-            default:
+            case 0: 
                 lastSelectedFreeplaySong = null;
-                removeModFromLibrary(args[0]); // testing, remove when done
+                removeModFromLibrary(modName); // testing, remove when done
                 _forceMainMenu = true;
                 ModsFolder.switchMod(ModsFolder.currentModFolder);
                 // FlxG.switchState(new MainMenuState());
+            default:
+                call("toMainMenu");
         }
     }
     
-    if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT) {
+    if (controls.RIGHT_P) {
         switch(currentState) {
-            case 1: changeDifficulty(1);
+            case 1: call("changeDifficulty", [1]);
         }
     }
-    if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT) {
+    if (controls.LEFT_P) {
         switch(currentState) {
-            case 1: changeDifficulty(-1);
+            case 1: call("changeDifficulty", [-1]);
         }
     }
     
-    if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP) {
+    if (controls.UP_P) {
         switch(currentState) {
-            case 1: changeFreeplaySelected(-1);
-            default: changeMainMenuSelected(-1);
+            case 1: call("changeFreeplaySelected", [-1]);
+            default: call("changeMainMenuSelected", [-1]);
         }
     }
-    if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.DOWN) {
+    if (controls.DOWN_P) {
         switch(currentState) {
-            case 1: changeFreeplaySelected(1);
-            default: changeMainMenuSelected(1);
+            case 1: call("changeFreeplaySelected", [1]);
+            default: call("changeMainMenuSelected", [1]);
         }
     }
 
-    if (FlxG.keys.justPressed.ENTER) {
+    if (controls.ACCEPT) {
         switch(currentState) {
-            case 1: enterFreeplaySong();
-            default: enterMainMenu();
+            case 1: call("enterFreeplaySong");
+            default: call("enterMainMenu");
         }
     }
 
@@ -114,7 +125,7 @@ function stateDisplay() {
     sectionTitle.shadowOffset.y = 3;
     add(sectionTitle);
 
-    currentModText = new FlxText(0,0, 0, args[0]);
+    currentModText = new FlxText(0,0, 0, modName);
 
     currentModText.setFormat(Paths.font("goodbyeDespair.ttf"), 32, 0xFFFFFFFF, "left", FlxTextBorderStyle.SHADOW, 0xFF000000);
     currentModText.borderSize = 2;
@@ -239,7 +250,7 @@ function cycleBg(?time:Int = 15) {
     if (cycleTimer.active) {
         cycleTimer.cancel();
         cancelNextCycle = true;
-        cycleBg(time);
+        call("cycleBg", [time]);
         return;
     }
 
@@ -252,7 +263,7 @@ function cycleBg(?time:Int = 15) {
         background.add(spr);
         FlxTween.tween(spr, {alpha: 1}, 1.5, {ease: FlxEase.quadInOut, onComplete: function() {
             background.forEach(function(bg) { if (bg.ID == currentBgID) bg.alpha = 0.0001; });
-            if (!cancelNextCycle) cycleBg(time);
+            if (!cancelNextCycle) call("cycleBg", [time]);
             currentBgID = newBgId;
         }});
     });
@@ -276,11 +287,11 @@ function menuShit() {
         selectItems.add(text);
     }
     if (currentState != 0) selectItems.forEach(function(item) { item.x = FlxG.width + 500; });
-    changeMainMenuSelected(0);
+    call("changeMainMenuSelected", [0]);
 }
 
 public var curSel:Int = 0;
-public var inactive:Array<Bool> = [false, true, true];
+public var inactive:Array<Bool> = [false, false, true];
 function changeMainMenuSelected(hur:Int = 0) {
     if (enteringMenu) return;
     curSel += hur;
@@ -299,6 +310,11 @@ function changeMainMenuSelected(hur:Int = 0) {
 }
 
 function toMainMenu() {
+    switch (currentState) {
+        case 1: menuTween();
+    }
+}
+public function menuTween() {
     currentState = 0;
         
     enteringMenu = false;
@@ -325,13 +341,15 @@ function enterMainMenu() {
         item.colorTransform.blueMultiplier = (tmr.loopsLeft % 2 == 0) ? 1 : 0.25;
 
         if (tmr.loopsLeft != 0) return;
-        
+        call("beginMenuAnimation");
         selectItems.forEach(function(item) {
             FlxTween.tween(item, {x: FlxG.width + 500}, 1, {ease: FlxEase.quadIn, startDelay: 0.1 * (item.ID + 1), onComplete: function() {
                 if (item.ID != selectItems.members.length-1) return;
-                currentState = (curSel+1);
-                endMenuAnimation();
             }});
+        });
+        new FlxTimer().start(1 + 0.1 * (selectItems.members.length), function(tmr) {
+            currentState = (curSel+1);
+            call("endMenuAnimation");
         });
     }, 10);
 }
@@ -339,9 +357,9 @@ function enterMainMenu() {
 function endMenuAnimation() {
     switch(selectableNames[curSel].toLowerCase()) {
         case "freeplay":
-            changeFreeplaySelected(0);
+            call("changeFreeplaySelected", [0]);
             FlxTween.tween(diffSelecter, {alpha: 1}, 0.75, {ease:FlxEase.quadInOut});
-            return;   
+            return;
     }
     if (!inactive[curSel]) return;
 
@@ -360,13 +378,14 @@ public var selectableNames = [
     "Freeplay", "Challenges", "Shop"
 ];
 for (itm in selectableNames) {
-    if (!Assets.exists(Paths.script("data/states/ModMenuStates/ljarcade."+itm))) continue;
+    var _path = "data/states/ModMenuStates/ljarcade."+itm+"Menu";
+    if (!Assets.exists(Paths.script(_path))) continue;
     
-    importScript("data/states/ModMenuStates/ljarcade."+itm);
+    importScript(_path);
 }
 
 function new() {
-    loadModToLibrary(args[0]); // testing, remove when done
+    loadModToLibrary(modName); // testing, remove when done
 }
 
 function create() {
@@ -392,15 +411,15 @@ function create() {
         bg.alpha = (currentBgID == idx) ? 1 : 0.0001;
         background.add(bg);
     }
-    cycleBg();
+    call("cycleBg");
 
-    menuShit();
-    freeplayShit();
+    call("freeplayShit");
+    call("menuShit");
     
-    bottomShit();
+    call("bottomShit");
     
-    stateDisplay();
-    levelArt();
+    call("stateDisplay");
+    call("levelArt");
 
     soon = new FlxText(0,0, FlxG.width/2 + 200, "Damn, its not ready yet...\n\nwait how did you get here?..\n\nimagine hacking the game (editing hscript)");
     soon.setFormat(Paths.font("goodbyeDespair.ttf"), 32, 0xFFFFFFFF, "center", FlxTextBorderStyle.SHADOW, 0xFF000000);
@@ -410,4 +429,15 @@ function create() {
     soon.screenCenter();
     soon.alpha = 0.0001;
     add(soon);
+}
+
+function call(func:String, ?args:Array<Dynamic> = []) {
+    if (args == null) args = [];
+    this.stateScripts.call(func, args);
+}
+
+public var songs = [];
+function freeplayShit() {
+    songs = FreeplaySonglist.get().songs;
+    if (songs == null || songs.length == 0) songs = FreeplaySonglist.get(false).songs;
 }

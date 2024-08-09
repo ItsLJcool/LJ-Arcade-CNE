@@ -14,14 +14,6 @@ import funkin.backend.system.Main;
 
 import funkin.backend.assets.ModsFolder;
 
-public function _initCacheSave() {
-	if (FlxG.save.data.lj_tokens == null) FlxG.save.data.lj_tokens = 0;
-
-	if (FlxG.save.data.lj_xp == null) FlxG.save.data.lj_xp = 0;
-	if (FlxG.save.data.lj_level == null) FlxG.save.data.lj_level = 0;
-	if (FlxG.save.data.lj_rank == null) FlxG.save.data.lj_rank = 0;
-}
-
 public function getGameJoltName() { return Base64.decode(Assets.getText(Paths.getPath("GameJolt API/TOKEN"))).toString(); }
 
 public static var GameJolt = {
@@ -58,6 +50,7 @@ public static var GameJolt = {
 			url += '&' + Std.string(i.name) + '=' + Std.string(i.value);
 		var urlEncoded:String = Md5.encode(url + GameJolt.privateKey);
 		GameJolt.http.url = url + '&signature=' + urlEncoded;
+		GameJolt.http.url = StringTools.replace(GameJolt.http.url, " ", "%20");
 		GameJolt.http.request(true);
 
 		var _data = Json.parse(GameJolt.http.responseData);
@@ -78,6 +71,7 @@ public static var GameJolt = {
 			url += '&' + Std.string(i.name) + '=' + Std.string(i.value);
 		var urlEncoded:String = Md5.encode(url + GameJolt.privateKey);
 		GameJolt.http.url = url + '&signature=' + urlEncoded;
+		GameJolt.http.url = StringTools.replace(GameJolt.http.url, " ", "%20");
 		GameJolt.http.request(false);
 
 		var _data = Json.parse(GameJolt.http.responseData);
@@ -107,6 +101,12 @@ public static var GameJolt = {
 	get_Save: function(key:String) { return GameJolt.get("data-store", [{name: "key", value: key}]); },
 	getUser_Save: function(key:String) {
 		return GameJolt.getUser("data-store", [
+			{name: "key", value: key},
+		]);
+	},
+	remove_Save: function(key:String) { return GameJolt.set("data-store/remove", [{name: "key", value: key}]); },
+	removeUser_Save: function(key:String) {
+		return GameJolt.setUser("data-store/remove", [
 			{name: "key", value: key},
 		]);
 	},

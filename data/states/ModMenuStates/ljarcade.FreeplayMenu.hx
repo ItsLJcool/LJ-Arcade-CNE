@@ -29,12 +29,13 @@ import StringTools;
 importScript('LJ Arcade API/tokens');
 
 var freeplaySel:Int = (lastSelectedFreeplaySong == null) ? 0 : lastSelectedFreeplaySong;
-public function changeFreeplaySelected(hur:Int = 0) {
+function changeFreeplaySelected(hur:Int = 0) {
     if (freeplayEntering) return;
     freeplaySel += hur;
     if (freeplaySel >= songs.length) freeplaySel = 0;
     if (freeplaySel < 0) freeplaySel = songs.length-1;
     
+    diffSel = songs[freeplaySel].difficulties.length-1;
     changeDifficulty(0);
 
     if (hur > 0) {
@@ -75,7 +76,7 @@ public function changeFreeplaySelected(hur:Int = 0) {
 }
 
 var diffSel:Int = 0;
-public function changeDifficulty(hur:Int = 0) {
+function changeDifficulty(hur:Int = 0) {
     if (freeplayEntering || diffSelecter == null) return;
 
     diffSel += hur;
@@ -100,7 +101,7 @@ function update(elapsed) {
         spr.x = FlxMath.lerp(spr.x, x, elapsed*10);
         spr.y = FlxMath.lerp(spr.y, bottomBar.y + bottomBar.height/2 - spr.height/2, elapsed*10);
 
-        var beVisible = (songs[freeplaySel].difficulties.length == 1 || currentState == 0) ? true : false;
+        var beVisible = (songs[freeplaySel].difficulties.length == 1 || currentState != 1) ? true : false;
         var alpha = (beVisible) ? 0.0001 : 1;
         spr.alpha = FlxMath.lerp(spr.alpha, alpha, elapsed*20);
     }
@@ -108,7 +109,7 @@ function update(elapsed) {
 
 var freeplayEntering:Bool = false;
 var freeplayAnimTimer:FlxTimer = new FlxTimer();
-public function enterFreeplaySong() {
+function enterFreeplaySong() {
     if (freeplayEntering) return;
     CoolUtil.playMenuSFX(1);
 
@@ -127,16 +128,7 @@ var songIcons:Array<HealthIcon> = [];
 
 var shineTimer:FlxTimer = new FlxTimer();
 
-var songs = [];
-public function freeplayShit() {
-    for (test in _loadedModAssetLibrary) { // just for support ig
-        for (s in FileSystem.readDirectory(test.getPath("assets/songs"))) {
-            if (Path.extension(s) != "" || !test.exists("assets/songs/"+s+"/meta.json")) continue;
-            var meta = Chart.loadChartMeta(s, "normal", false);
-            songs.push(meta);
-        }
-    }
-
+function freeplayShit() {
     songTab = new FlxSprite(-150, 0, Paths.image("Freeplay/songTag"));
     songTab.onDraw = updateSongTab;
     songTab.scale.set(1.25, 1.25);
@@ -189,7 +181,7 @@ public function freeplayShit() {
 var _songItems:Int = 11;
 var _songCenter:Int = Math.floor(_songItems * 0.5);
 var _cachePos:Array<{x:Float, y:Float}> = [for (i in 0..._songItems) {x: ((currentState != 1) ? -FlxG.width : -150 * (i != _songCenter)), y: FlxG.height * 0.5 + 100 * (i - _songCenter), alpha: 1}];
-public function updateSongTab(sprite:FlxSprite) {
+function updateSongTab(sprite:FlxSprite) {
     for (i in 0..._songItems) {
         var songItem = (i - _songCenter) + freeplaySel;
         songItem = ((songItem % songs.length) + songs.length) % songs.length; // this should be a positive modulo.

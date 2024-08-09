@@ -1,11 +1,8 @@
 //a
 
 function onSongEnd() {
-    trace("onSongEnd");
     switchTo_Ratings = true;
     ratings_data.difficulty = PlayState.instance.difficulty;
-
-
 
     ratings_data.comboRatings = (comboRatings == null || comboRatings.length == 0) ? [
         new ComboRating(0, "F", 0xFFFF4444),
@@ -39,6 +36,7 @@ var _notesRatingHit:Map<String, Int> = [
     "good" => 0,
     "bad" => 0,
     "shit" => 0,
+    "misses" => 0,
 ];
 
 var _initalScrollSpeed:Float = 0;
@@ -62,7 +60,7 @@ function update(elapsed) {
 
     if (usingBotplay) return;
     
-    // if (canAccessDebugMenus || !validScore) usingBotplay = true; // like setting cheating to true ig
+    // if (canAccessDebugMenus || !validScore) usingBotplay = true; // for testing rn, disabled the `canAccessDebugMenus` check
     if (!validScore) usingBotplay = true; // like setting cheating to true ig
 
     var cpuStrums:Int = 0;
