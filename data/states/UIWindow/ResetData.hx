@@ -5,6 +5,7 @@ import funkin.editors.ui.UIButton;
 import funkin.editors.ui.UIText;
 import funkin.editors.ui.UIUtil;
 import funkin.editors.ui.UIScrollBar;
+import Type;
 
 importScript("LJ Arcade API/tokens");
 
@@ -67,7 +68,13 @@ function deleteSaveData() {
     FlxTween.tween(closeButton.field, {alpha: 0}, 0.5, {ease: FlxEase.sineInOut});
     deleteButton.field.text = "Deleting Save Data...";
     FlxTween.tween(deleteButton, {x: (winWidth / 2) - (deleteButton.bWidth / 2)}, 1, {ease: FlxEase.sineInOut, onComplete: function() {
-        _resetData();
+        _resettingData();
         FlxG.state.closeSubState();
     }});
+}
+
+function _resettingData() {
+    var pog = GameJolt.getUser_KeySave();
+    if (pog != null && pog.length > 0) for (data in pog.keys) GameJolt.removeUser_Save(data.key);
+    _resetData();
 }

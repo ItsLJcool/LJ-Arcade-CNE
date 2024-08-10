@@ -93,22 +93,20 @@ public static var GameJolt = {
 	},
 
 	set_Save: function(key:String, save) { return GameJolt.set("data-store/set", [{name: "key", value: key}, {name: "data", value: save }]); },
-	setUser_Save: function(key:String, save) {
-		return GameJolt.setUser("data-store/set", [
-			{name: "key", value: key}, {name: "data", value: save },
-		]);
-	},
+	setUser_Save: function(key:String, save) { return GameJolt.setUser("data-store/set", [{name: "key", value: key}, {name: "data", value: save}]); },
 	get_Save: function(key:String) { return GameJolt.get("data-store", [{name: "key", value: key}]); },
-	getUser_Save: function(key:String) {
-		return GameJolt.getUser("data-store", [
-			{name: "key", value: key},
-		]);
-	},
+	getUser_Save: function(key:String) { return GameJolt.getUser("data-store", [{name: "key", value: key}]); },
+
 	remove_Save: function(key:String) { return GameJolt.set("data-store/remove", [{name: "key", value: key}]); },
-	removeUser_Save: function(key:String) {
-		return GameJolt.setUser("data-store/remove", [
-			{name: "key", value: key},
-		]);
+	removeUser_Save: function(key:String) { return GameJolt.setUser("data-store/remove", [{name: "key", value: key}]); },
+
+	get_KeySave: function(?pattern:String) {
+		if (pattern == null) return GameJolt.get("data-store/get-keys", []);
+		return GameJolt.get("data-store/get-keys", [{name: "pattern", value: pattern}]);
+	},
+	getUser_KeySave: function(?pattern:String) {
+		if (pattern == null) return GameJolt.getUser("data-store/get-keys", []);
+		return GameJolt.getUser("data-store/get-keys", [{name: "pattern", value: pattern}]);
 	},
 
 	lastUnlockedTrophy: null,

@@ -73,10 +73,6 @@ function update(elapsed) {
     if (cpuStrums == strumLines.members.length) usingBotplay = true;
 }
 
-function new() {
-    usingBotplay = false;
-}
-
 function onPlayerHit(event) {
     if (usingBotplay) return;
     var daNote = event.note;

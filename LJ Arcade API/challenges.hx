@@ -73,9 +73,14 @@ public static var global_amount_percent:Float = 50.0;
 
 var global_Challenges:Array<Dynamic> = [
     new_challenge("Beat ${song_name}"),
+    new_challenge("Hit 1/4th of all notes in ${song_name}"),
+    new_challenge("Hit Half of all notes in ${song_name}"),
 ];
 public function add_global_challenge(chall:Dynamic) {
-    global_Challenges.push(chall);
+    if (chall.length > 0)
+        for (_chall in chall) global_Challenges.push(_chall);
+    else 
+        global_Challenges.push(chall);
 }
 
 /**

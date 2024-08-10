@@ -222,6 +222,7 @@ function changeChallengeSel(hur:Int = 0) {
 var selectedChallenge:Bool = false;
 function onSelectChallenge() {
     if (selectedChallenge) return;
+    usingBotplay = false;
     selectedChallenge = true;
     var challenge = _challenges[challengeSel];
     ljarcade_challenge.isChallenge = true;

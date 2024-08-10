@@ -111,6 +111,7 @@ var freeplayEntering:Bool = false;
 var freeplayAnimTimer:FlxTimer = new FlxTimer();
 function enterFreeplaySong() {
     if (freeplayEntering) return;
+    usingBotplay = false;
     CoolUtil.playMenuSFX(1);
 
     lastSelectedFreeplaySong = freeplaySel;

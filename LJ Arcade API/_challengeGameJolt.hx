@@ -5,6 +5,7 @@ importScript("GameJolt API/old gamejolt");
 //a
 
 public static var max_challenges:Int = 3;
+public static var _saveChallenges_GameJolt:Bool = false;
 
 var default_challenge_data = {
     __init: false,
@@ -24,12 +25,7 @@ public function _initChallengeSave(_modName:String, ?useCache:Bool = false) { if
         var challenge = challengeString((i+1), _modName);
         var pog = Reflect.getProperty(FlxG.save.data, challenge, _modName);
         if (pog != null) continue;
-        var gj_challenge = get_challenge((i+1), _modName, useCache);
-        if (gj_challenge == null) 
-            Reflect.setProperty(FlxG.save.data, challenge, Reflect.copy(default_challenge_save));
-        else {
-            Reflect.setProperty(FlxG.save.data, challenge, gj_challenge);
-        }
+        Reflect.setProperty(FlxG.save.data, challenge, Reflect.copy(default_challenge_save));
         pog = Reflect.getProperty(FlxG.save.data, challenge, _modName);
     }
     FlxG.save.flush();
@@ -43,8 +39,7 @@ public function __resetChallengeSave(_modName:String) {
 public function get_all_challenges(modName:String, ?forceCache:Bool = true) { if (forceCache == null) forceCache = true;
     var challenges = [];
     
-    for (i in 0...max_challenges)
-        challenges.push(get_challenge((i+1), modName, forceCache));
+    for (i in 0...max_challenges) challenges.push(get_challenge((i+1), modName, forceCache));
 
     return challenges;
 }
@@ -53,9 +48,11 @@ function challengeString(id:Int, _modName:String) return _modName+"_challenge"+i
 function _gj_challengeString(id:Int, append:String, _modName:String) return _modName+"_challenge"+id+"_"+append;
 
 public function remove_challenge(id:Int, _modName:String) {
-    if (id > max_challenges || id <= 0) return null;
+    if (id > max_challenges || id <= 0) return;
     var challenge = challengeString(id, _modName);
     Reflect.setProperty(FlxG.save.data, challenge, null);
+    FlxG.save.flush();
+    if (!_saveChallenges_GameJolt) return;
     GameJolt.removeUser_Save(_gj_challengeString(id, _modName, "data.name"));
     GameJolt.removeUser_Save(_gj_challengeString(id, _modName, "data.diff"));
     GameJolt.removeUser_Save(_gj_challengeString(id, _modName, "time"));
@@ -63,7 +60,7 @@ public function remove_challenge(id:Int, _modName:String) {
 
 public function get_challenge(id:Int, _modName:String, ?cache:Bool = true) { if (cache == null) cache = true;
     if (id > max_challenges || id <= 0) return null;
-    if (cache || !usingGameJolt) return Reflect.getProperty(FlxG.save.data, challengeString(id, _modName));
+    if (cache || !usingGameJolt || !_saveChallenges_GameJolt) return Reflect.getProperty(FlxG.save.data, challengeString(id, _modName));
     
     var data = {
         name: GameJolt.getUser_Save(_gj_challengeString(id, _modName, "data.name")).data,
@@ -77,7 +74,7 @@ public function get_challenge(id:Int, _modName:String, ?cache:Bool = true) { if 
 
 public function set_challenge(id:Int, _modName:String, time, data, ?forceCache:Bool = false) { if (forceCache == null) forceCache = false;
     if (id > max_challenges || id <= 0) return null;
-    if (forceCache || !usingGameJolt) {
+    if (forceCache || !usingGameJolt || !_saveChallenges_GameJolt) {
         var _chal = challengeString(id, _modName);
         var challengeSave = Reflect.getProperty(FlxG.save.data, _chal);
         challengeSave.time = time;
@@ -95,6 +92,7 @@ public function set_challenge(id:Int, _modName:String, time, data, ?forceCache:B
 
     GameJolt.setUser_Save(_gj_challengeString(id, _modName, "data.name"), data.name);
     GameJolt.setUser_Save(_gj_challengeString(id, _modName, "data.diff"), data.diff);
+    
     return get_challenge(id, _modName);
 }
 

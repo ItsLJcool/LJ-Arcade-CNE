@@ -44,7 +44,6 @@ if (_fromFreeplay) {
     _fromFreeplay = false;
     currentState = 1;
 }
-_fromChallenges = true;
 if (_fromChallenges) {
     _fromChallenges = false;
     currentState = 2;

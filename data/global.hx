@@ -145,7 +145,7 @@ function preStateSwitch() {
             modGlobalScript = null;
         }
 
-        if (switchTo_Ratings) {
+        if (switchTo_Ratings && !usingBotplay) {
             switchTo_Ratings = false;
             if (ratings_data.songsData == null || ratings_data.songsData.length == 0) {}
             else {
@@ -188,13 +188,12 @@ function preStateSwitch() {
 		// loop through all the states, and cool
 		for (state in allStates) {
 			state = Path.withoutExtension(state);
-
 			if ((state == checking) || (state == (customPrefix + "." + checking))
 			|| (state == (customPrefix+".ui."+checking))) {
 				possibleState = true;
 				goingToUIstate = (checkNull) ? (state == checking) : (state == (customPrefix+".ui."+checking));
 				if (goingToUIstate) {
-					var _addon = (checkNull) ? "/"+customPrefix+"." : "/"+customPrefix+".ui.";
+					var _addon = (checkNull) ? "/" : "/"+customPrefix+".ui.";
 					var finalName = checkSplit.join("/")+_addon+checking;
 
 					FlxG.game._requestedState = new UIState(true, finalName);
