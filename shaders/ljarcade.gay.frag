@@ -2,6 +2,7 @@
 
 #define PRIDE 0
 #define TRANS 1
+#define PAN 2
 
 uniform int flag;
 
@@ -22,6 +23,10 @@ void main() {
         else if(uv.y < 3.0/5.0) color.rgb = vec3(1.0, 1.0, 1.0) * color.a;
         else if(uv.y < 4.0/5.0) color.rgb = vec3(0.968,0.658,0.721) * color.a;
         else if(uv.y < 5.0/5.0) color.rgb = vec3(0.333,0.803,0.98) * color.a;
+    } else if(flag == PAN) {
+        if(uv.y < 1.0/3.0) color.rgb = vec3(1.0, 0.129, 0.549) * color.a;
+        else if(uv.y < 2.0/3.0) color.rgb = vec3(1.0, 0.847, 0.0) * color.a;
+        else if(uv.y < 3.0/3.0) color.rgb = vec3(0.129, 0.694, 1.0) * color.a;
     }
 
     gl_FragColor = color;

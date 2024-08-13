@@ -55,21 +55,33 @@ var song_notes:Int = 0;
 var _numNotes:Int = 0;
 
 var _splitCam:FlxCamera;
+
+var _RANDOMGAY:Bool = false;
 function postCreate() {
+    // runs only once
+    check_challenge_data(function(isGlobal, challengeID, data) {
+        if (!isGlobal) return;
+        switch(challengeID) {
+            case 13:
+                // also this only contains the latest reference
+                _splitCam = new HudCamera();
+                _splitCam.bgColor = 0;
+                _splitCam.downscroll = !camHUD.downscroll;
+                FlxG.cameras.add(_splitCam, false);
+                var random1 = FlxG.random.int(0, 3);
+                var random2 = FlxG.random.int(0, 3, [random1]);
+                for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
+            case 14: _RANDOMGAY = FlxG.random.bool(1);
+        }
+    });
+
     strumLines.forEach(function(strum) {
         check_challenge_data(function(isGlobal, challengeID, data) {
             if (!isGlobal) return;
             switch(challengeID) {
                 case 7, 8: strum.onNoteUpdate.add(fadingNotes);
-                case 13:
-                    _splitCam = new HudCamera();
-                    _splitCam.bgColor = 0;
-                    _splitCam.downscroll = !camHUD.downscroll;
-                    FlxG.cameras.add(_splitCam, false);
-                    var random1 = FlxG.random.int(0, 3);
-                    var random2 = FlxG.random.int(0, 3, [random1]);
-                    for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
-                case 14: gay(strum);
+                case 14:
+                    if (!_RANDOMGAY) gay(strum);
             }
         });
         if (strum.opponentSide) return;
@@ -94,17 +106,21 @@ function postCreate() {
 
 }
 
-function gay(strum) {
-
+function getPrideFlag() {
     var PRIDE = 0;
     var TRANS = 1;
+    var PAN = 2;
 
-    var flagChoices = [PRIDE, TRANS];
+    var flagChoices = [PRIDE, TRANS, PAN];
 
+    return flagChoices[FlxG.random.int(0, flagChoices.length - 1)];
+}
+
+function gay(strum) {
     for(note in strum.notes.members) {
         if (note.noteType != null) continue;
         note.shader = new CustomShader("ljarcade.gay");
-        note.shader.flag = flagChoices[FlxG.random.int(0, flagChoices.length - 1)];
+        note.shader.flag = getPrideFlag();
     }
 }
 
@@ -268,6 +284,8 @@ function update(elapsed) {
     if (FlxG.keys.justPressed.K && _isChallenge) 
         complete_challenge();
 
+
+    if (_RANDOMGAY) trustTheProcess(members);
 }
 
 function postUpdate(elapsed) {
@@ -282,6 +300,38 @@ function postUpdate(elapsed) {
                 if (_splitCam != null) _splitCam.zoom = camHUD.zoom;
         }
     });
+}
+
+var gayMap:Map<Dynamic, Dynamic> = [
+    new FlxSprite() => null, // hate my life
+];
+
+function trustTheProcess(cum:Array<FlxBasic>) {
+    for(spr in cum) {
+        if(spr == null) continue;
+        // trust the process
+        if(spr.members != null) {
+            trustTheProcess(spr.members);
+        }
+        if(spr.notes != null) {
+            spr.notes.forEach(function (note) {
+                if(note == null || note.noteType != null) return;
+                trustTheProcess([note]);
+            });
+        }
+        //if(spr.notes != null) {
+        //    trustTheProcess(spr.notes.members);
+        //}
+        if(spr.type == 2 || spr.type == 4) {
+        } else {
+            if(Std.isOfType(spr, FlxSprite)) {
+                if(gayMap.exists(spr)) continue;
+                gayMap.set(spr, 0);
+                spr.shader = new CustomShader("ljarcade.gay");
+                spr.shader.flag = getPrideFlag();
+            }
+        }
+    }
 }
 
 class AudioEffects extends flixel.FlxBasic {
