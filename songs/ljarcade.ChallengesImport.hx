@@ -111,8 +111,34 @@ function fadingNotes(event) {
             //     note.colorTransform.color = 0x000000;
         }
 
-        
     });
+}
+
+function getRainbowColor(hue:Float):Int {
+    var r:Float;
+    var g:Float;
+    var b:Float;
+
+    var i:Int = Math.floor(hue * 6);
+    var f:Float = hue * 6 - i;
+    var q:Float = 1 - f;
+    i = i % 6;
+
+    switch (i) {
+        case 0: r = 1; g = f; b = 0;
+        case 1: r = q; g = 1; b = 0;
+        case 2: r = 0; g = 1; b = f;
+        case 3: r = 0; g = q; b = 1;
+        case 4: r = f; g = 0; b = 1;
+        case 5: r = 1; g = 0; b = q;
+        default: r = 0; g = 0; b = 0;
+    }
+
+    var red:Int = Math.floor(r * 255);
+    var green:Int = Math.floor(g * 255);
+    var blue:Int = Math.floor(b * 255);
+
+    return (red << 16) | (green << 8) | blue;
 }
 
 function noteChallenge(divideAmount:Int) {
