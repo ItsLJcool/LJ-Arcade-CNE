@@ -96,12 +96,6 @@ function postStateSwitch() {
     _fromFreeplay = false;
 }
 
-import Sys;
-
-function update(elapsed) {
-    FlxG.autoPause = false;
-    Sys.command("start CodenameEngine.exe");
-}
 function preStateSwitch() {
 
     if (inRatings) {

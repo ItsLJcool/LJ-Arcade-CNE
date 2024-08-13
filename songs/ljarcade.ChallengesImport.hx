@@ -218,69 +218,13 @@ function update(elapsed) {
             case 12:
                 for (sound in FlxG.sound.list) muffle(sound);
                 for (cam in FlxG.cameras.list) cameraBlur(cam);
+                blurShader.entropy = FlxG.random.float(0, 1);
         }
     });
 
     if (FlxG.keys.justPressed.K && _isChallenge) 
         complete_challenge();
 
-    blurShader.entropy = FlxG.random.float(0, 1);
-
-    trustTheProcess(members);
-}
-
-var flip = new CustomShader("ljarcade.flip");
-
-flip.mulY = 1;
-
-import Sys;
-
-function trustTheProcess(cum:Array<FlxBasic>) {
-    for(cam in FlxG.cameras.list) {
-        if(_cumearaMap.exists(cam) && _cumearaMap.get(cam) != null) continue;
-        _cumearaMap.set(cam, 0);
-        cam.addShader(flip);
-        /*cam.angle += 30 * FlxG.elapsed;
-        if(cam.downscroll != null) {
-            cam.downscroll = !cam.downscroll;
-            //if(cam.angle > 180) {
-            //    cam.downscroll = true;
-            //} else {
-            //    cam.downscroll = false;
-            //}
-        }*/
-    }
-    flip.mulX = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
-    window.x = FlxG.stage.fullScreenWidth * FlxG.random.float(0.0, 0.9);
-    window.y = FlxG.stage.fullScreenHeight * FlxG.random.float(0.0, 0.9);
-    
-    //FlxG.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-    //flip.mulY = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
-    /*for(spr in cum) {
-        if(spr == null) continue;
-        // trust the process
-        if(spr.members != null) {
-            trustTheProcess(spr.members);
-        }
-        if(spr.notes != null) {
-            trustTheProcess(spr.notes.members);
-        }
-        if(spr.type == 2 || spr.type == 4) {
-        } else {
-            if(Std.isOfType(spr, FlxSprite)) {
-                if(FlxG.game.ticks % 5000 > 2500) {
-                    spr.angle += 30 * FlxG.elapsed;
-                } else {
-                    spr.angle -= 30 * FlxG.elapsed;
-                }
-                //spr.flipX = FlxG.random.bool();
-                //spr.flipY = FlxG.random.bool();
-                //spr.scale.y = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
-                //spr.scale.x = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
-                //spr.angle += FlxG.elapsed * 10;
-            }
-        }
-    }*/
 }
 
 class AudioEffects extends flixel.FlxBasic {
