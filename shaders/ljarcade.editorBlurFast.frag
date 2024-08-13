@@ -30,7 +30,13 @@ void main() {
 
 	vec4 a = getColor(camPos+(random(camPos + entropy)*blur - blur / 2.0)) * uBrightness;
 	a += getColor(camPos+(random(camPos+0.1 + entropy)*blur - blur / 2.0)) * uBrightness;
-	//a += getColor(camPos+(random(camPos+0.2)*blur - blur / 2.0)) * uBrightness;
-	//a += getColor(camPos+(random(camPos+0.3)*blur - blur / 2.0)) * uBrightness;
-	gl_FragColor = a / 2.0;
+	a += getColor(camPos+(random(camPos+0.2 + entropy)*blur - blur / 2.0)) * uBrightness;
+	a += getColor(camPos+(random(camPos+0.3 + entropy)*blur - blur / 2.0)) * uBrightness;
+	a += getColor(camPos+(random(camPos+0.4 + entropy)*blur - blur / 2.0)) * uBrightness;
+	a += getColor(camPos+(random(camPos+0.5 + entropy)*blur - blur / 2.0)) * uBrightness;
+	a += getColor(camPos+(random(camPos+0.6 + entropy)*blur - blur / 2.0)) * uBrightness;
+	a += getColor(camPos+(random(camPos+0.7 + entropy)*blur - blur / 2.0)) * uBrightness;
+	a += getColor(camPos+(random(camPos+0.8 + entropy)*blur - blur / 2.0)) * uBrightness;
+	a += getColor(camPos+(random(camPos+0.9 + entropy)*blur - blur / 2.0)) * uBrightness;
+	gl_FragColor = a / 10.0;
 }

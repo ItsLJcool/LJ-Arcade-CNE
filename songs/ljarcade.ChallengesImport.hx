@@ -2,6 +2,7 @@
 import Type;
 import Reflect;
 import StringTools;
+import funkin.game.HudCamera;
 import funkin.backend.scripting.DummyScript;
 import funkin.backend.scripting.Script;
 import flixel.system.FlxSound;
@@ -52,12 +53,22 @@ function destroy() {
 
 var song_notes:Int = 0;
 var _numNotes:Int = 0;
+
+var _splitCam:FlxCamera;
 function postCreate() {
     strumLines.forEach(function(strum) {
         check_challenge_data(function(isGlobal, challengeID, data) {
             if (!isGlobal) return;
             switch(challengeID) {
                 case 7, 8: strum.onNoteUpdate.add(fadingNotes);
+                case 13:
+                    _splitCam = new HudCamera();
+                    _splitCam.bgColor = 0;
+                    _splitCam.downscroll = !camHUD.downscroll;
+                    FlxG.cameras.add(_splitCam, false);
+                    var random1 = FlxG.random.int(0, 3);
+                    var random2 = FlxG.random.int(0, 3, [random1]);
+                    for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
             }
         });
         if (strum.opponentSide) return;
@@ -82,9 +93,6 @@ function postCreate() {
 
 }
 
-var blurShader:CustomShader = new CustomShader("ljarcade.editorBlurFast");
-blurShader.uBlur = 0.04;
-blurShader.uBrightness = 1;
 function fadingNotes(event) {
     var note = event.note;
     var alphaSus = (note.isSustainNote) ? 0.6 : 1;
@@ -205,6 +213,9 @@ function muffle(sound) {
     _soundsMap.set(sound, effect);
 }
 
+var blurShader:CustomShader = new CustomShader("ljarcade.editorBlurFast");
+blurShader.uBlur = 0.04;
+blurShader.uBrightness = 1;
 function cameraBlur(cam:FlxCamera) {
     if (_camerasMap.exists(cam) && _camerasMap.get(cam) != null) return;
     cam.addShader(blurShader);
@@ -212,6 +223,13 @@ function cameraBlur(cam:FlxCamera) {
 }
 
 function update(elapsed) {
+
+    if (FlxG.keys.justPressed.K && _isChallenge) 
+        complete_challenge();
+
+}
+
+function postUpdate(elapsed) {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
@@ -219,12 +237,10 @@ function update(elapsed) {
                 for (sound in FlxG.sound.list) muffle(sound);
                 for (cam in FlxG.cameras.list) cameraBlur(cam);
                 blurShader.entropy = FlxG.random.float(0, 1);
+            case 13:
+                if (_splitCam != null) _splitCam.zoom = camHUD.zoom;
         }
     });
-
-    if (FlxG.keys.justPressed.K && _isChallenge) 
-        complete_challenge();
-
 }
 
 class AudioEffects extends flixel.FlxBasic {

@@ -94,6 +94,7 @@ var global_Challenges:Array<Dynamic> = [
     
     /* 11 */ new_challenge("Beat ${song_name} whilst gaining HALF of all notes health value", 2),
     /* 12 */ new_challenge("Beat ${song_name} with muffled audio AND visually impaired", 2),
+    /* 13 */ new_challenge("Beat ${song_name} with strumlines split on Downscroll / Upscroll", 3),
 ];
 /**
     ItsLJcool: % chance Dad notes can go to your strumline
