@@ -69,6 +69,7 @@ function postCreate() {
                     var random1 = FlxG.random.int(0, 3);
                     var random2 = FlxG.random.int(0, 3, [random1]);
                     for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
+                case 14: gay(strum);
             }
         });
         if (strum.opponentSide) return;
@@ -91,6 +92,20 @@ function postCreate() {
         }
     });
 
+}
+
+function gay(strum) {
+
+    var PRIDE = 0;
+    var TRANS = 1;
+
+    var flagChoices = [PRIDE, TRANS];
+
+    for(note in strum.notes.members) {
+        if (note.noteType != null) continue;
+        note.shader = new CustomShader("ljarcade.gay");
+        note.shader.flag = flagChoices[FlxG.random.int(0, flagChoices.length - 1)];
+    }
 }
 
 function fadingNotes(event) {
