@@ -80,12 +80,29 @@ public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
 public static var global_amount_percent:Float = 50.0;
 
 var global_Challenges:Array<Dynamic> = [
-    new_challenge("Beat ${song_name}"),
-    new_challenge("Hit 1/4th of all notes in ${song_name}"),
-    new_challenge("Hit Half of all notes in ${song_name}"),
-    new_challenge("Hit a minimum of ${rand_int(50, 100)} sicks in ${song_name}"),
-    new_challenge("Beat ${song_name} with ${rand_int(20, 40)}% chance of Posion Notes of spawning", 2),
+    /*  0 */ new_challenge("Beat ${song_name}"),
+    /*  1 */ new_challenge("Hit 1/4th of all notes in ${song_name}"),
+    /*  2 */ new_challenge("Hit Half of all notes in ${song_name}"),
+    /*  3 */ new_challenge("Hit a minimum of ${rand_int(50, 100)} sicks in ${song_name}"),
+    /*  4 */ new_challenge("Beat ${song_name} with ${rand_int(20, 25)}% chance of Posion Notes of spawning", 2),
+    /*  5 */ new_challenge("Beat ${song_name} within ${rand_int(5, 20)} misses"),
+    /*  6 */ new_challenge("Beat ${song_name} without ANY misses", 2),
+    /*  7 */ new_challenge("Beat ${song_name} whilst the notes fade IN", 2),
+    /*  8 */ new_challenge("Beat ${song_name} whilst the notes fade OUT", 2),
+    /*  9 */ new_challenge("Beat ${song_name} without hitting a SINGLE Sick!", 3),
+    /* 10 */ new_challenge("Beat ${song_name} without going past HALF health", 2),
+    
+    /* 11 */ new_challenge("Beat ${song_name} whilst gaining HALF of all notes health value", 2),
+    /* 12 */ new_challenge("Beat ${song_name} with muffled audio AND visually impaired", 2),
 ];
+/**
+    ItsLJcool: % chance Dad notes can go to your strumline
+    Frakits: you can also add mirrored mode which flips the strum order and makes it a pain to play
+
+    Neo: Beat ${song_name} in dodge mode ( https://discord.com/channels/860561967383445535/1051235299419766854/1272868717453377547 )
+
+    ItsLJcool: @Frakits#0234 what if you are given the notes in a list order and you have to memorize the measure of the notes before playing it 💀
+**/
 public function add_global_challenge(chall:Dynamic) {
     if (chall.length > 0)
         for (_chall in chall) global_Challenges.push(_chall);

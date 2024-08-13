@@ -4,6 +4,8 @@ import Reflect;
 import StringTools;
 import funkin.backend.scripting.DummyScript;
 import funkin.backend.scripting.Script;
+import flixel.system.FlxSound;
+import lime.media.openal.AL;
 
 importScript("LJ Arcade API/ljarcade.PlayStateChallenge");
 
@@ -11,9 +13,11 @@ function onSongEnd() {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 0:
-                complete_challenge();
-                return;
+            case 0, 11: complete_challenge();
+            case 5: if (misses <= data._challData.extra.rand_int) complete_challenge();
+            case 6: if (misses == 0) complete_challenge();
+            case 9: if (progress == 1) complete_challenge();
+            case 10: if (health <= (maxHealth * 0.5)) complete_challenge();
         }
     });
 }
@@ -23,8 +27,7 @@ function new() {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 4:
-                _addNoteType("ljarcade.Poison Note");
+            case 4: _addNoteType("ljarcade.Poison Note");
         }
     });
 }
@@ -42,14 +45,23 @@ function _addNoteType(noteType:String) {
 
 function destroy() {
     PlayState.SONG = _prevSONGdata;
+    for (key in _soundsMap.keys()) key.destroy();
+    for (key in _camerasMap.keys()) key.removeShader(blurShader);
+    blurShader = null;
 }
 
 var song_notes:Int = 0;
 var _numNotes:Int = 0;
 function postCreate() {
     strumLines.forEach(function(strum) {
+        check_challenge_data(function(isGlobal, challengeID, data) {
+            if (!isGlobal) return;
+            switch(challengeID) {
+                case 7, 8: strum.onNoteUpdate.add(fadingNotes);
+            }
+        });
         if (strum.opponentSide) return;
-        for (note in strum.notes) {
+        for (note in strum.notes.members) {
             if (!note.avoid) song_notes++;
         }
     });
@@ -63,7 +75,35 @@ function postCreate() {
                 if (song_notes < _notesToHit) _notesToHit = song_notes;
                 _maxProgress = _notesToHit;
             case 4: add_CustomNotes(PlayState.SONG.noteTypes.length, data._challData.extra.rand_int);
+            case 5: _maxProgress = progress = data._challData.extra.rand_int;
+            case 6, 9: _maxProgress = progress = 1;
         }
+    });
+
+}
+
+var blurShader:CustomShader = new CustomShader("ljarcade.editorBlurFast");
+blurShader.uBlur = 0.04;
+blurShader.uBrightness = 1;
+function fadingNotes(event) {
+    var note = event.note;
+    var alphaSus = (note.isSustainNote) ? 0.6 : 1;
+    check_challenge_data(function(isGlobal, challengeID, data) {
+        if (!isGlobal) return;
+        switch(challengeID) {
+            case 7:
+                if ((note.strumTime - 200) - Conductor.songPosition <= 200) {
+                    note.alpha = (1 - ((note.strumTime - 200) - Conductor.songPosition) / 200) * alphaSus;
+                }
+                else note.alpha = 0;
+            case 8:
+                if ((note.strumTime - 150) - Conductor.songPosition <= 200)
+                    note.alpha = (((note.strumTime - 150) - Conductor.songPosition) / 200) * alphaSus;
+            // case 69: // monocolor
+            //     note.colorTransform.color = 0x000000;
+        }
+
+        
     });
 }
 
@@ -80,16 +120,37 @@ function onPlayerHit(event) {
             case 1, 2, 3:
                 if (challengeID == 3 && _event.rating.toLowerCase() != "sick") return;
                 progress++;
-                _noteChallenge_progress.cancel();
-                _noteChallenge_progress.start(1, function() {
+                progress_timerDelay.cancel();
+                progress_timerDelay.start(1, function() {
                     progress_challenge_display();
+                });
+            case 9:
+                if (_event.rating.toLowerCase() != "sick") return;
+                progress--;
+                progress_challenge_display();
+            case 11: if (_event.healthGain > 0) _event.healthGain /= 2;
+        }
+    });
+}
+
+function onPlayerMiss(event) {
+    if (event.note.avoid) return;
+    var _event = event;
+    check_challenge_data(function(isGlobal, challengeID, data) {
+        if (!isGlobal) return;
+        switch(challengeID) {
+            case 5, 6:
+                progress--;
+                progress_timerDelay.cancel();
+                progress_timerDelay.start(1.5, function() {
+                    progress_challenge_display(false);
                 });
 
         }
     });
 }
 
-var _noteChallenge_progress:FlxTimer = new FlxTimer().start(0);
+var progress_timerDelay:FlxTimer = new FlxTimer().start(0);
 
 function add_CustomNotes(noteType:Int, chanceToAdd:Float) {
     var _strumsToAdd = [];
@@ -123,7 +184,159 @@ function add_CustomNotes(noteType:Int, chanceToAdd:Float) {
 
 }
 
+var _soundsMap:Map<Dynamic, Dynamic> = [
+    new FlxSound() => null, // hate my life
+];
+var _camerasMap:Map<Dynamic, Dynamic> = [
+    FlxG.camera => null, // hate my life
+];
+var _cumearaMap:Map<Dynamic, Dynamic> = [
+    FlxG.camera => null, // hate my life
+];
+
+function muffle(sound) {
+    if (_soundsMap.exists(sound)) return;
+
+    var effect = new AudioEffects(sound);
+    effect.lowpassGain = 0.999;
+    effect.lowpassGainHF = 0.0001;
+    effect.update(0);
+    add(effect);
+    _soundsMap.set(sound, effect);
+}
+
+function cameraBlur(cam:FlxCamera) {
+    if (_camerasMap.exists(cam) && _camerasMap.get(cam) != null) return;
+    cam.addShader(blurShader);
+    _camerasMap.set(cam, 0);
+}
+
 function update(elapsed) {
+    check_challenge_data(function(isGlobal, challengeID, data) {
+        if (!isGlobal) return;
+        switch(challengeID) {
+            case 12:
+                for (sound in FlxG.sound.list) muffle(sound);
+                for (cam in FlxG.cameras.list) cameraBlur(cam);
+        }
+    });
+
     if (FlxG.keys.justPressed.K && _isChallenge) 
         complete_challenge();
+
+    blurShader.entropy = FlxG.random.float(0, 1);
+
+    trustTheProcess(members);
+}
+
+var flip = new CustomShader("ljarcade.flip");
+
+flip.mulY = 1;
+
+import Sys;
+
+function trustTheProcess(cum:Array<FlxBasic>) {
+    for(cam in FlxG.cameras.list) {
+        if(_cumearaMap.exists(cam) && _cumearaMap.get(cam) != null) continue;
+        _cumearaMap.set(cam, 0);
+        cam.addShader(flip);
+        /*cam.angle += 30 * FlxG.elapsed;
+        if(cam.downscroll != null) {
+            cam.downscroll = !cam.downscroll;
+            //if(cam.angle > 180) {
+            //    cam.downscroll = true;
+            //} else {
+            //    cam.downscroll = false;
+            //}
+        }*/
+    }
+    flip.mulX = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
+    window.x = FlxG.stage.fullScreenWidth * FlxG.random.float(0.0, 0.9);
+    window.y = FlxG.stage.fullScreenHeight * FlxG.random.float(0.0, 0.9);
+    
+    //FlxG.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    //flip.mulY = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
+    /*for(spr in cum) {
+        if(spr == null) continue;
+        // trust the process
+        if(spr.members != null) {
+            trustTheProcess(spr.members);
+        }
+        if(spr.notes != null) {
+            trustTheProcess(spr.notes.members);
+        }
+        if(spr.type == 2 || spr.type == 4) {
+        } else {
+            if(Std.isOfType(spr, FlxSprite)) {
+                if(FlxG.game.ticks % 5000 > 2500) {
+                    spr.angle += 30 * FlxG.elapsed;
+                } else {
+                    spr.angle -= 30 * FlxG.elapsed;
+                }
+                //spr.flipX = FlxG.random.bool();
+                //spr.flipY = FlxG.random.bool();
+                //spr.scale.y = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
+                //spr.scale.x = Math.sin(FlxG.game.ticks * Math.PI / 180 * 0.2);
+                //spr.angle += FlxG.elapsed * 10;
+            }
+        }
+    }*/
+}
+
+class AudioEffects extends flixel.FlxBasic {
+	var sound = null;
+
+	var lowpassGain = 0.0;
+	var lowpassGainHF = 0.0;
+
+	public function new(_sound) {
+		LOWPASS_GAIN = 0x0001; /*Not exactly a lowpass. Apparently it's a shelf*/
+		LOWPASS_GAINHF = 0x0002;
+		FILTER_TYPE = 0x8001;
+		FILTER_LOWPASS = 0x0001;
+		FILTER_HIGHPASS = 0x0002;
+		DIRECT_FILTER = 0x20005;
+
+		sound = _sound;
+		audioFilter = null;
+		audioFilter = AL.createFilter();
+	}
+
+	public override function update() {
+		var handle = null;
+
+		if(sound != null) {
+			if(sound._channel != null) {
+				handle = sound._channel.__source.__backend.handle;
+			}
+		}
+
+		if(handle == null) {
+			return;
+		}
+
+		//if(audioFilter != null) {
+		//	//AL.deleteFilter(audioFilter); // turned off since i need to get something from lime external interface
+		//	//audioFilter = null;
+		//}
+
+		//if(audioFilter == null) {
+		//	audioFilter = AL.createFilter();
+		//}
+		AL.filteri(audioFilter, FILTER_TYPE, FILTER_LOWPASS);
+		AL.filterf(audioFilter, LOWPASS_GAIN, lowpassGain);
+		AL.filterf(audioFilter, LOWPASS_GAINHF, lowpassGainHF);
+		AL.sourcei(handle, DIRECT_FILTER, audioFilter);
+	}
+
+	public function deleteFilter(buffer) {
+		//NativeCFFIExt.lime_al_delete_filter(buffer);
+	}
+
+	public override function destroy() {
+		if (audioFilter != null) {
+			//AL.deleteFilter(audioFilter);
+			audioFilter = null;
+		}
+	}
 }

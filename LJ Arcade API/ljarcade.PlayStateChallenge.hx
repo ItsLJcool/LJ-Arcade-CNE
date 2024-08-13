@@ -31,6 +31,7 @@ public var progress:Int = 0;
 
 var _doingProgress:Bool = false;
 public function progress_challenge_display(?autoComplete:Bool = true) { if (autoComplete == null) autoComplete = true;
+    trace("progress_challenge_display called");
     if (_challengeCompleted || _doingProgress) return;
     if (progress >= _maxProgress) {
         if (autoComplete) complete_challenge();
@@ -39,9 +40,10 @@ public function progress_challenge_display(?autoComplete:Bool = true) { if (auto
     _doingProgress = true;
 
     var math = (progressBar.frameWidth * (_progress_value / _maxProgress)) - 33;
+    var _autoComplete = autoComplete;
     FlxTween.tween(progressBar.clipRect, {width: math}, 0.5, {startDelay: 1, ease: FlxEase.quadInOut, onComplete: function() {
         if (
-            (autoComplete && _challengeCompleted) ||
+            (_autoComplete && _challengeCompleted) ||
             (_progress_value >= _maxProgress)
         ) bloomaMount = 0.3;
     }});
@@ -91,7 +93,7 @@ function doProgressBarInit() {
     progressBar.cameras = [camChallenge];
     progressBar.setGraphicSize(progressBarBG.width);
     progressBar.updateHitbox();
-    progressBar.clipRect = new FlxRect(25, 0, 0, progressBar.height);
+    progressBar.clipRect = new FlxRect(25, 0, (progressBar.frameWidth * (progress / _maxProgress)) - 33, progressBar.height);
     progressBar.antialiasing = true;
     add(progressBar);
 
