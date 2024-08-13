@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="progressBar.png">
+<SubTexture name="barFillLoop0000" x="0" y="0" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0001" x="0" y="0" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0002" x="0" y="80" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0003" x="0" y="80" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0004" x="218" y="0" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0005" x="218" y="0" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0006" x="218" y="80" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0007" x="218" y="80" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0008" x="0" y="160" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0009" x="0" y="160" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0010" x="218" y="160" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0011" x="218" y="160" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0012" x="0" y="240" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0013" x="0" y="240" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0014" x="218" y="240" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0015" x="218" y="240" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0016" x="0" y="320" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0017" x="0" y="320" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0018" x="218" y="320" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0019" x="218" y="320" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0020" x="436" y="0" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+<SubTexture name="barFillLoop0021" x="436" y="0" width="218" height="80" frameX="-24" frameY="-25" frameWidth="240" frameHeight="130" />
+</TextureAtlas>

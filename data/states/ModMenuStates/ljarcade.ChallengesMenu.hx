@@ -20,7 +20,6 @@ var challengesName:FlxSprite;
 var maxChallenges:Int = max_challenges;
 
 var _challenges:Array<Dynamic> = [];
-
 function new() {
     // __resetChallengeSave(modName);
     _initChallengeSave(modName);

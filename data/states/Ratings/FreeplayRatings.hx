@@ -361,10 +361,10 @@ function updateShit() {
     xpToLevel.setPosition(levelBar.x + levelBar.width - xpToLevel.width, levelBar.y + levelText.height + 10);
 }
 
-var bloomaMount = 1; // stolen from YTP lmao
+var bloomaMount = 0.9; // stolen from YTP lmao
 function update(elapsed) {
     if (newRank) {
-        bloomaMount = FlxMath.lerp(bloomaMount, 1, elapsed*0.15);
+        bloomaMount = FlxMath.lerp(bloomaMount, 0.9, elapsed*0.15);
         bloom.data.dim.value = [bloomaMount, bloomaMount];
     }
 

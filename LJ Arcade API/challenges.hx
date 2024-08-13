@@ -1,5 +1,6 @@
 //a
 import funkin.backend.chart.Chart;
+import flixel.math.FlxMath;
 import Reflect;
 
 importScript("GameJolt API/old gamejolt");
@@ -22,6 +23,7 @@ public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
         name: name,
         diff: diff,
         time_hours: time_hours,
+        extra: {},
     };
 
     // functions
@@ -56,6 +58,12 @@ public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
         obj._songName = StringTools.replace(songName.toLowerCase(), " ", "-");
         return obj;
     };
+    obj.setExtra = function(name:String, value:Dynamic) {
+        if (value == null || name == null) return obj;
+        Reflect.setField(obj.extra, name, value);
+        return obj;
+    };
+
     obj.__itself = function() {
         return new_challenge(obj.name, obj.diff, obj.time_hours);
     };
@@ -75,6 +83,8 @@ var global_Challenges:Array<Dynamic> = [
     new_challenge("Beat ${song_name}"),
     new_challenge("Hit 1/4th of all notes in ${song_name}"),
     new_challenge("Hit Half of all notes in ${song_name}"),
+    new_challenge("Hit a minimum of ${rand_int(50, 100)} sicks in ${song_name}"),
+    new_challenge("Beat ${song_name} with ${rand_int(20, 40)}% chance of Posion Notes of spawning", 2),
 ];
 public function add_global_challenge(chall:Dynamic) {
     if (chall.length > 0)
@@ -99,7 +109,7 @@ public function add_songSpecific_challenge(chall:Dynamic, song:String) {
 }
 
 var replace_strings:Array<String> = [
-    "${song_name}", 
+    "${song_name}", "${rand_int(", "${rand_float("
 ];
 
 // TODO: Make it so a setting can toggle difficulty Challenges to be a specific difficulty array.
@@ -130,11 +140,25 @@ function get_random_songSpecific(meta, ?exclude:Array<Int>) {
 function set_challenge_data(challenge:Dynamic, meta:Dynamic, _random:Int, ?_type:String = "global") {
     if (_type == null) _type = "global";
     for (_replace in replace_strings) {
-        challenge.name = switch(_replace) {
-            case replace_strings[0]: StringTools.replace(challenge.name, _replace, (meta.displayName == null) ? meta.name : meta.displayName);
-            default: challenge;
+        if (!StringTools.contains(challenge.name, _replace)) continue;
+        switch(_replace) {
+            case replace_strings[0]:
+                challenge.name = StringTools.replace(challenge.name, _replace, (meta.displayName == null) ? meta.name : meta.displayName);
+            case replace_strings[1], replace_strings[2]:
+                var getChars = challenge.name.split(_replace)[1];
+                var min = getChars.split(",")[0];
+                var max = StringTools.replace(getChars.split(",")[1], ")}", "");
+                max = StringTools.replace(max, " ", "");
+
+                var funcRandom = (replace_strings[2] == _replace) ? FlxG.random.float : FlxG.random.int;
+                var random = funcRandom(Std.parseInt(min), Std.parseInt(max));
+                random = FlxMath.roundDecimal(random, 2);
+                challenge.setExtra("rand_int", random);
+
+                challenge.name = StringTools.replace(challenge.name, (_replace+(getChars.split("}")[0]+"}")), Std.string(random));
         };
     }
+
     challenge.setSongName(meta.name);
 
     return {
