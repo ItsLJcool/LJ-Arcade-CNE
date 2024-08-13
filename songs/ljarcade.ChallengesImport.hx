@@ -14,7 +14,7 @@ function onSongEnd() {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 0, 11: complete_challenge();
+            case 0, 11, 12, 13: complete_challenge();
             case 5: if (misses <= data._challData.extra.rand_int) complete_challenge();
             case 6: if (misses == 0) complete_challenge();
             case 9: if (progress == 1) complete_challenge();
