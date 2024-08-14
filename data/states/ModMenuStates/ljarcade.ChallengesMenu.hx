@@ -81,6 +81,7 @@ function update_challengeData(id:Int, dateNow:Int, new_challenge:Bool = false) {
     var randomMetaSong = null;
     var challengeData = null;
     if (new_challenge) {
+        if (_pickedChallenges.length == maxChallenges) _pickedChallenges = [];
         var rndm = FlxG.random.int(0, songs.length-1, _pickedChallenges);
         _pickedChallenges[idx] = rndm;
         randomMetaSong = songs[rndm];
