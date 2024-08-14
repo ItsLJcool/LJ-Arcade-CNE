@@ -118,8 +118,7 @@ function update_challengeData(id:Int, dateNow:Int, new_challenge:Bool = false) {
         }
         
         text.text = challengeData._challData.name;
-    
-        text.fieldWidth = bgSprite.width - icon.x - icon.width - playSpr.width;
+        
         text.x = icon.x + icon.width + 5;
         text.y = bgSprite.y + bgSprite.height * 0.5 - text.height * 0.5;
         text.updateHitbox();
@@ -187,6 +186,13 @@ function update(elapsed) {
         updateChallenges(elapsed);
     }
     else if (slider.alpha != 1) slider.alpha = FlxMath.lerp(slider.alpha, 1, elapsed*10);
+
+    if (FlxG.keys.justPressed.I) {
+        var _dateNow = Date.now().getTime();
+        for (i in 0...maxChallenges) {
+            update_challengeData((i+1), _dateNow, true);
+        }
+    }
 }
 
 function updateChallenges(elapsed) {

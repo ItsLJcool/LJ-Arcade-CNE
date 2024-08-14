@@ -6,6 +6,8 @@ import funkin.game.HudCamera;
 import funkin.backend.scripting.DummyScript;
 import funkin.backend.scripting.Script;
 import flixel.system.FlxSound;
+
+import openfl.filters.ShaderFilter;
 import lime.media.openal.AL;
 
 importScript("LJ Arcade API/ljarcade.PlayStateChallenge");
@@ -49,6 +51,7 @@ function destroy() {
     for (key in _soundsMap.keys()) key.destroy();
     for (key in _camerasMap.keys()) key.removeShader(blurShader);
     blurShader = null;
+    FlxG.sound.soundTray.filters = [];
 }
 
 var song_notes:Int = 0;
@@ -57,21 +60,16 @@ var _numNotes:Int = 0;
 var _splitCam:FlxCamera;
 
 var _RANDOMGAY:Bool = false;
+
 function postCreate() {
-    // runs only once
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
-        trace("challengeID: " + challengeID);
         switch(challengeID) {
             case "strum_split songEnd_complete":
-                // also this only contains the latest reference
                 _splitCam = new HudCamera();
                 _splitCam.bgColor = 0;
                 _splitCam.downscroll = !camHUD.downscroll;
                 FlxG.cameras.add(_splitCam, false);
-                var random1 = FlxG.random.int(0, 3);
-                var random2 = FlxG.random.int(0, 3, [random1]);
-                for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
             case "gay songEnd_complete": _RANDOMGAY = FlxG.random.bool(1);
         }
     });
@@ -81,6 +79,10 @@ function postCreate() {
             if (!isGlobal) return;
             if (StringTools.startsWith(challengeID, "notes_fade")) strum.onNoteUpdate.add(fadingNotes);
             switch(challengeID) {
+                case "strum_split songEnd_complete":
+                    var random1 = FlxG.random.int(0, 3);
+                    var random2 = FlxG.random.int(0, 3, [random1]);
+                    for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
                 case "gay songEnd_complete":
                     if (!_RANDOMGAY) gay(strum);
             }
@@ -263,19 +265,21 @@ var _cumearaMap:Map<Dynamic, Dynamic> = [
     FlxG.camera => null, // hate my life
 ];
 
+var _muffleData = {lowpassGain: 1, lowpassGainHF: 1};
 function muffle(sound) {
     if (_soundsMap.exists(sound)) return;
 
     var effect = new AudioEffects(sound);
-    effect.lowpassGain = 0.999;
-    effect.lowpassGainHF = 0.0001;
+    effect.lowpassGain = _muffleData.lowpassGain;
+    effect.lowpassGainHF = _muffleData.lowpassGainHF;
     effect.update(0);
     add(effect);
     _soundsMap.set(sound, effect);
 }
 
 var blurShader:CustomShader = new CustomShader("ljarcade.editorBlurFast");
-blurShader.uBlur = 0.04;
+var _blurData = {uBlur: 1, uBrightness: 1};
+blurShader.uBlur = 0;
 blurShader.uBrightness = 1;
 function cameraBlur(cam:FlxCamera) {
     if (_camerasMap.exists(cam) && _camerasMap.get(cam) != null) return;
@@ -288,10 +292,10 @@ function update(elapsed) {
     if (FlxG.keys.justPressed.K && _isChallenge) 
         complete_challenge();
 
-
     if (_RANDOMGAY) trustTheProcess(members);
 }
 
+var startMuffle:Bool = true;
 function postUpdate(elapsed) {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
@@ -299,9 +303,48 @@ function postUpdate(elapsed) {
             case "visually_impaired songEnd_complete":
                 for (sound in FlxG.sound.list) muffle(sound);
                 for (cam in FlxG.cameras.list) cameraBlur(cam);
+
                 blurShader.entropy = FlxG.random.float(0, 1);
+                
+                var shaderFilter = new ShaderFilter(blurShader);
+                shaderFilter.shader.data.uBlur.value[0] = blurShader.uBlur;
+                shaderFilter.shader.data.uBrightness.value[0] = blurShader.uBrightness;
+                shaderFilter.shader.data.entropy.value[0] = blurShader.entropy;
+                FlxG.sound.soundTray.filters = [shaderFilter];
             case "strum_split songEnd_complete":
                 if (_splitCam != null) _splitCam.zoom = camHUD.zoom;
+        }
+    });
+}
+
+function onSongStart() {
+    check_challenge_data(function(isGlobal, challengeID, data) {
+        if (!isGlobal) return;
+        switch(challengeID) {
+            case "visually_impaired songEnd_complete":
+                var ease = FlxEase.quadInOut;
+                var kys = {uBlur: blurShader.uBlur};
+                FlxTween.tween(kys, {uBlur: 0.04}, Conductor.crochet * 0.001, {ease: ease,
+                onUpdate: function(tween) {
+                    blurShader.uBlur = _blurData.uBlur = kys.uBlur;
+                }});
+
+                for (keys in _soundsMap.keys()) {
+                    var effect = _soundsMap.get(keys);
+                    if (effect == null) continue;
+                    var kys = {lowpassGain: effect.lowpassGain, lowpassGainHF: effect.lowpassGainHF};
+
+                    FlxTween.tween(kys, {lowpassGain: 0.999}, Conductor.crochet / 500, {ease: ease,
+                    onUpdate: function(tween) {
+                        effect.lowpassGain = _muffleData.lowpassGain = kys.lowpassGain;
+                        effect.update(0);
+                    }});
+                    FlxTween.tween(kys, {lowpassGainHF: 0.0001}, Conductor.crochet / 500, {ease: ease,
+                    onUpdate: function(tween) {
+                        effect.lowpassGainHF = _muffleData.lowpassGainHF = kys.lowpassGainHF;
+                        effect.update(0);
+                    }});
+                }
         }
     });
 }
