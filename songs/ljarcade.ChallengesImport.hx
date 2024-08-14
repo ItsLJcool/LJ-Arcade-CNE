@@ -17,6 +17,7 @@ function onSongEnd() {
         if (!isGlobal) return;
         if (StringTools.contains(challengeID, "songEnd_complete")) complete_challenge();
         switch(challengeID) {
+            case "poison_notes_rand": complete_challenge();
             case "least_misses": if (misses <= data._challData.extra.rand_int) complete_challenge();
             case "no_misses": if (misses == 0) complete_challenge();
             case "no_sicks": if (progress == 1) complete_challenge();
@@ -71,6 +72,8 @@ function postCreate() {
                 _splitCam.downscroll = !camHUD.downscroll;
                 FlxG.cameras.add(_splitCam, false);
             case "gay songEnd_complete": _RANDOMGAY = FlxG.random.bool(1);
+            case "visually_impaired songEnd_complete":
+                for (muff in [inst, vocals]) muffle(muff);
         }
     });
 
@@ -80,9 +83,12 @@ function postCreate() {
             if (StringTools.startsWith(challengeID, "notes_fade")) strum.onNoteUpdate.add(fadingNotes);
             switch(challengeID) {
                 case "strum_split songEnd_complete":
-                    var random1 = FlxG.random.int(0, 3);
-                    var random2 = FlxG.random.int(0, 3, [random1]);
-                    for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
+                    var randoms = [];
+                    for (i in 0...Std.int(strum.members.length / 2)) randoms.push(FlxG.random.int(0, strum.members.length - 1, randoms));
+                    for (rand in randoms) {
+                        if (strum.members[rand].camera != camHUD) continue;
+                        strum.members[rand].camera = _splitCam;
+                    }
                 case "gay songEnd_complete":
                     if (!_RANDOMGAY) gay(strum);
             }
@@ -121,9 +127,13 @@ function getPrideFlag() {
     return flagChoices[FlxG.random.int(0, flagChoices.length - 1)];
 }
 
+function onPostNoteCreation(event) {
+    var note:Note = event.note;
+    if (event.noteSprite == "game/notes/default") note.extra.set("ljarcade_usesDefaultNote", true);
+}
 function gay(strum) {
     for(note in strum.notes.members) {
-        if (note.noteType != null) continue;
+        if (!note.extra.get("ljarcade_usesDefaultNote") || note.shader != null) continue;
         note.shader = new CustomShader("ljarcade.gay");
         note.shader.flag = getPrideFlag();
     }
@@ -318,34 +328,36 @@ function postUpdate(elapsed) {
 }
 
 function onSongStart() {
-    check_challenge_data(function(isGlobal, challengeID, data) {
-        if (!isGlobal) return;
-        switch(challengeID) {
-            case "visually_impaired songEnd_complete":
-                var ease = FlxEase.quadInOut;
-                var kys = {uBlur: blurShader.uBlur};
-                FlxTween.tween(kys, {uBlur: 0.04}, Conductor.crochet * 0.001, {ease: ease,
-                onUpdate: function(tween) {
-                    blurShader.uBlur = _blurData.uBlur = kys.uBlur;
-                }});
-
-                for (keys in _soundsMap.keys()) {
-                    var effect = _soundsMap.get(keys);
-                    if (effect == null) continue;
-                    var kys = {lowpassGain: effect.lowpassGain, lowpassGainHF: effect.lowpassGainHF};
-
-                    FlxTween.tween(kys, {lowpassGain: 0.999}, Conductor.crochet / 500, {ease: ease,
+    new FlxTimer().start(0.5, function() {
+        check_challenge_data(function(isGlobal, challengeID, data) {
+            if (!isGlobal) return;
+            switch(challengeID) {
+                case "visually_impaired songEnd_complete":
+                    var ease = FlxEase.quadInOut;
+                    var kys = {uBlur: blurShader.uBlur};
+                    FlxTween.tween(kys, {uBlur: 0.04}, Conductor.crochet * 0.001, {ease: ease,
                     onUpdate: function(tween) {
-                        effect.lowpassGain = _muffleData.lowpassGain = kys.lowpassGain;
-                        effect.update(0);
+                        blurShader.uBlur = _blurData.uBlur = kys.uBlur;
                     }});
-                    FlxTween.tween(kys, {lowpassGainHF: 0.0001}, Conductor.crochet / 500, {ease: ease,
-                    onUpdate: function(tween) {
-                        effect.lowpassGainHF = _muffleData.lowpassGainHF = kys.lowpassGainHF;
-                        effect.update(0);
-                    }});
-                }
-        }
+    
+                    for (keys in _soundsMap.keys()) {
+                        var effect = _soundsMap.get(keys);
+                        if (effect == null) continue;
+                        var kys = {lowpassGain: effect.lowpassGain, lowpassGainHF: effect.lowpassGainHF};
+    
+                        FlxTween.tween(kys, {lowpassGain: 0.999}, Conductor.crochet / 500, {ease: ease,
+                        onUpdate: function(tween) {
+                            effect.lowpassGain = _muffleData.lowpassGain = kys.lowpassGain;
+                            effect.update(0);
+                        }});
+                        FlxTween.tween(kys, {lowpassGainHF: 0.0001}, Conductor.crochet / 500, {ease: ease,
+                        onUpdate: function(tween) {
+                            effect.lowpassGainHF = _muffleData.lowpassGainHF = kys.lowpassGainHF;
+                            effect.update(0);
+                        }});
+                    }
+            }
+        });
     });
 }
 
@@ -359,17 +371,20 @@ function trustTheProcess(cum:Array<FlxBasic>) {
         // trust the process
         if(spr.members != null) {
             trustTheProcess(spr.members);
+            continue;
         }
         if(spr.notes != null) {
             spr.notes.forEach(function (note) {
-                if(note == null || note.noteType != null) return;
+                if(note == null || !note.extra.get("ljarcade_usesDefaultNote")) return;
                 trustTheProcess([note]);
             });
+            continue;
         }
         //if(spr.notes != null) {
         //    trustTheProcess(spr.notes.members);
         //}
         if(spr.type == 2 || spr.type == 4) {
+            continue;
         } else {
             if(Std.isOfType(spr, FlxSprite)) {
                 if(gayMap.exists(spr)) continue;
@@ -377,6 +392,7 @@ function trustTheProcess(cum:Array<FlxBasic>) {
                 spr.shader = new CustomShader("ljarcade.gay");
                 spr.shader.flag = getPrideFlag();
             }
+            continue;
         }
     }
 }
