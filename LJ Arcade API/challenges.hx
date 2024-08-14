@@ -14,7 +14,7 @@ var _maxDiff:Int = 3; // changable in the future
 var _maxHours:Int = 48;
 var _minHours:Int = 1;
 var _defualtHours:Int = 24;
-public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
+public function new_challenge(name:String, challenge_id:String, ?diff:Int = 1, ?time_hours:Int = 0) {
     if (diff == null) diff = _minDiff;
     if (time_hours == null) time_hours = _defualtHours;
     // because classes are unstable until rev+428-55
@@ -24,6 +24,7 @@ public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
         diff: diff,
         time_hours: time_hours,
         extra: {},
+        challenge_identifier: challenge_id,
     };
 
     // functions
@@ -58,6 +59,11 @@ public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
         obj._songName = StringTools.replace(songName.toLowerCase(), " ", "-");
         return obj;
     };
+    obj.setChallengeID = function(challenge_identifier:String) {
+        if (challenge_identifier == null) return obj;
+        obj.challenge_identifier = challenge_identifier;
+        return obj;
+    };
     obj.setExtra = function(name:String, value:Dynamic) {
         if (value == null || name == null) return obj;
         Reflect.setField(obj.extra, name, value);
@@ -65,13 +71,14 @@ public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
     };
 
     obj.__itself = function() {
-        return new_challenge(obj.name, obj.diff, obj.time_hours);
+        return new_challenge(obj.name, obj.challenge_identifier, obj.diff, obj.time_hours);
     };
 
     // force update within bounds
     obj.setDiff(diff);
     obj.setName(name);
     obj.setTimeLimit(time_hours);
+    obj.setChallengeID(challenge_id);
 
     return obj;
 }
@@ -80,22 +87,22 @@ public function new_challenge(name:String, ?diff:Int = 1, ?time_hours:Int = 0) {
 public static var global_amount_percent:Float = 50.0;
 
 var global_Challenges:Array<Dynamic> = [
-    /*  0 */ new_challenge("Beat ${song_name}"),
-    /*  1 */ new_challenge("Hit 1/4th of all notes in ${song_name}"),
-    /*  2 */ new_challenge("Hit Half of all notes in ${song_name}"),
-    /*  3 */ new_challenge("Hit a minimum of ${rand_int(50, 100)} sicks in ${song_name}"),
-    /*  4 */ new_challenge("Beat ${song_name} with ${rand_int(20, 25)}% chance of Posion Notes of spawning", 2),
-    /*  5 */ new_challenge("Beat ${song_name} within ${rand_int(5, 20)} misses"),
-    /*  6 */ new_challenge("Beat ${song_name} without ANY misses", 2),
-    /*  7 */ new_challenge("Beat ${song_name} whilst the notes fade IN", 2),
-    /*  8 */ new_challenge("Beat ${song_name} whilst the notes fade OUT", 2),
-    /*  9 */ new_challenge("Beat ${song_name} without hitting a SINGLE Sick!", 3),
-    /* 10 */ new_challenge("Beat ${song_name} without going past HALF health", 2),
+    /*  0 */ new_challenge("Beat ${song_name}", "songEnd_complete"),
+    /*  1 */ new_challenge("Hit 1/4th of all notes in ${song_name}", "hit_notes").setExtra("divideAmount", 4),
+    /*  2 */ new_challenge("Hit Half of all notes in ${song_name}", "hit_notes").setExtra("divideAmount", 2),
+    /*  3 */ new_challenge("Hit a minimum of ${rand_int(50, 100)} sicks in ${song_name}", "hit_sicks"),
+    /*  4 */ new_challenge("Beat ${song_name} with ${rand_int(20, 25)}% chance of Poison Notes of spawning", "poison_notes_rand", 2),
+    /*  5 */ new_challenge("Beat ${song_name} within ${rand_int(5, 20)} misses", "least_misses"),
+    /*  6 */ new_challenge("Beat ${song_name} without ANY misses", "no_misses", 2),
+    /*  7 */ new_challenge("Beat ${song_name} whilst the notes fade IN", "notes_fade_in songEnd_complete", 2),
+    /*  8 */ new_challenge("Beat ${song_name} whilst the notes fade OUT", "notes_fade_out songEnd_complete", 2),
+    /*  9 */ new_challenge("Beat ${song_name} without hitting a SINGLE Sick!", "no_sicks", 3),
+    /* 10 */ new_challenge("Beat ${song_name} without going past HALF health", "half_health", 2),
     
-    /* 11 */ new_challenge("Beat ${song_name} whilst gaining HALF of all notes health value", 2),
-    /* 12 */ new_challenge("Beat ${song_name} with muffled audio AND visually impaired", 2),
-    /* 13 */ new_challenge("Beat ${song_name} with strumlines split on Downscroll / Upscroll", 3),
-    /* 13 */ new_challenge("Beat ${song_name} with... wait why do the notes look like that?"),
+    /* 11 */ new_challenge("Beat ${song_name} whilst gaining HALF of all notes health value", "half_gain songEnd_complete", 2),
+    /* 12 */ new_challenge("Beat ${song_name} with muffled audio AND visually impaired", "visually_impaired songEnd_complete", 2),
+    /* 13 */ new_challenge("Beat ${song_name} with strumlines split on Downscroll / Upscroll", "strum_split songEnd_complete", 3),
+    /* 14 */ new_challenge("Beat ${song_name} with... wait why do the notes look like that?", "gay songEnd_complete"),
 ];
 /**
     ItsLJcool: % chance Dad notes can go to your strumline

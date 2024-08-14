@@ -30,9 +30,9 @@ var _progress_value:Int = 0; // Internal use
 public var progress:Int = 0;
 
 var _doingProgress:Bool = false;
+public var disable_progress_display:Bool = false;
 public function progress_challenge_display(?autoComplete:Bool = true) { if (autoComplete == null) autoComplete = true;
-    trace("progress_challenge_display called");
-    if (_challengeCompleted || _doingProgress) return;
+    if (_challengeCompleted || _doingProgress || disable_progress_display) return;
     if (progress >= _maxProgress) {
         if (autoComplete) complete_challenge();
     }
@@ -58,7 +58,7 @@ var _challengeData = ljarcade_challenge.getChallenge();
 public function check_challenge_data(func) {
     if (!_isChallenge || !Reflect.isFunction(func)) return;
 
-    func((_challengeData.type == "global"), _challengeData.random, _challengeData);
+    func((_challengeData.type == "global"), _challengeData._challData.challenge_identifier, _challengeData);
 } 
 
 var camChallenge:FlxCamera;

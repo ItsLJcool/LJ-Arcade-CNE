@@ -13,12 +13,12 @@ importScript("LJ Arcade API/ljarcade.PlayStateChallenge");
 function onSongEnd() {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
+        if (StringTools.contains(challengeID, "songEnd_complete")) complete_challenge();
         switch(challengeID) {
-            case 0, 11, 12, 13: complete_challenge();
-            case 5: if (misses <= data._challData.extra.rand_int) complete_challenge();
-            case 6: if (misses == 0) complete_challenge();
-            case 9: if (progress == 1) complete_challenge();
-            case 10: if (health <= (maxHealth * 0.5)) complete_challenge();
+            case "least_misses": if (misses <= data._challData.extra.rand_int) complete_challenge();
+            case "no_misses": if (misses == 0) complete_challenge();
+            case "no_sicks": if (progress == 1) complete_challenge();
+            case "half_health": if (health <= (maxHealth * 0.5)) complete_challenge();
         }
     });
 }
@@ -28,7 +28,7 @@ function new() {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 4: _addNoteType("ljarcade.Poison Note");
+            case "poison_notes_rand": _addNoteType("ljarcade.Poison Note");
         }
     });
 }
@@ -61,8 +61,9 @@ function postCreate() {
     // runs only once
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
+        trace("challengeID: " + challengeID);
         switch(challengeID) {
-            case 13:
+            case "strum_split songEnd_complete":
                 // also this only contains the latest reference
                 _splitCam = new HudCamera();
                 _splitCam.bgColor = 0;
@@ -71,16 +72,16 @@ function postCreate() {
                 var random1 = FlxG.random.int(0, 3);
                 var random2 = FlxG.random.int(0, 3, [random1]);
                 for (rand in [random1, random2]) strum.members[rand].cameras = [_splitCam];
-            case 14: _RANDOMGAY = FlxG.random.bool(1);
+            case "gay songEnd_complete": _RANDOMGAY = FlxG.random.bool(1);
         }
     });
 
     strumLines.forEach(function(strum) {
         check_challenge_data(function(isGlobal, challengeID, data) {
             if (!isGlobal) return;
+            if (StringTools.startsWith(challengeID, "notes_fade")) strum.onNoteUpdate.add(fadingNotes);
             switch(challengeID) {
-                case 7, 8: strum.onNoteUpdate.add(fadingNotes);
-                case 14:
+                case "gay songEnd_complete":
                     if (!_RANDOMGAY) gay(strum);
             }
         });
@@ -92,15 +93,17 @@ function postCreate() {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 1: noteChallenge(4);
-            case 2: noteChallenge(2);
-            case 3:
+            case "hit_notes":
+                var _amount = data._challData.extra.divideAmount;
+                if (_amount == null) _amount = 2;
+                noteChallenge(_amount);
+            case "hit_sicks":
                 var _notesToHit = data._challData.extra.rand_int;
                 if (song_notes < _notesToHit) _notesToHit = song_notes;
                 _maxProgress = _notesToHit;
-            case 4: add_CustomNotes(PlayState.SONG.noteTypes.length, data._challData.extra.rand_int);
-            case 5: _maxProgress = progress = data._challData.extra.rand_int;
-            case 6, 9: _maxProgress = progress = 1;
+            case "poison_notes_rand": add_CustomNotes(PlayState.SONG.noteTypes.length, data._challData.extra.rand_int);
+            case "least_misses": _maxProgress = progress = data._challData.extra.rand_int;
+            case "no_misses", "no_sicks": _maxProgress = progress = 1;
         }
     });
 
@@ -130,12 +133,12 @@ function fadingNotes(event) {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 7:
+            case "notes_fade_in songEnd_complete":
                 if ((note.strumTime - 200) - Conductor.songPosition <= 200) {
                     note.alpha = (1 - ((note.strumTime - 200) - Conductor.songPosition) / 200) * alphaSus;
                 }
                 else note.alpha = 0;
-            case 8:
+            case "notes_fade_out songEnd_complete":
                 if ((note.strumTime - 150) - Conductor.songPosition <= 200)
                     note.alpha = (((note.strumTime - 150) - Conductor.songPosition) / 200) * alphaSus;
             // case 69: // monocolor
@@ -182,18 +185,19 @@ function onPlayerHit(event) {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 1, 2, 3:
-                if (challengeID == 3 && _event.rating.toLowerCase() != "sick") return;
+            case "hit_notes", "hit_sicks":
+                if (challengeID == "hit_sicks" && _event.rating.toLowerCase() != "sick") return;
                 progress++;
                 progress_timerDelay.cancel();
                 progress_timerDelay.start(1, function() {
                     progress_challenge_display();
                 });
-            case 9:
+            case "no_sicks":
                 if (_event.rating.toLowerCase() != "sick") return;
                 progress--;
                 progress_challenge_display();
-            case 11: if (_event.healthGain > 0) _event.healthGain /= 2;
+                disable_progress_display = true;
+            case "half_gain songEnd_complete": if (_event.healthGain > 0) _event.healthGain /= 2;
         }
     });
 }
@@ -204,7 +208,7 @@ function onPlayerMiss(event) {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 5, 6:
+            case "least_misses", "no_misses":
                 progress--;
                 progress_timerDelay.cancel();
                 progress_timerDelay.start(1.5, function() {
@@ -292,11 +296,11 @@ function postUpdate(elapsed) {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
-            case 12:
+            case "visually_impaired songEnd_complete":
                 for (sound in FlxG.sound.list) muffle(sound);
                 for (cam in FlxG.cameras.list) cameraBlur(cam);
                 blurShader.entropy = FlxG.random.float(0, 1);
-            case 13:
+            case "strum_split songEnd_complete":
                 if (_splitCam != null) _splitCam.zoom = camHUD.zoom;
         }
     });
