@@ -86,7 +86,6 @@ function postCreate() {
                     var randoms = [];
                     for (i in 0...Std.int(strum.members.length / 2)) randoms.push(FlxG.random.int(0, strum.members.length - 1, randoms));
                     for (rand in randoms) {
-                        if (strum.members[rand].camera != camHUD) continue;
                         strum.members[rand].camera = _splitCam;
                     }
                 case "gay songEnd_complete":
