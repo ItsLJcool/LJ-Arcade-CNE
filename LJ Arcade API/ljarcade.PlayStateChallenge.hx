@@ -13,6 +13,7 @@ public var _isChallenge:Bool = (_fromChallenges == null) ? false : _fromChalleng
 
 var _challengeCompleted:Bool = false;
 function destroy() {
+    trace("Challenge Completed: " + _challengeCompleted);
     if (!_challengeCompleted || paused || usingBotplay) return;
     remove_challenge(ljarcade_challenge.getChallengeID(), ljarcade_challenge.getModName());
 }
@@ -58,7 +59,11 @@ var _challengeData = ljarcade_challenge.getChallenge();
 public function check_challenge_data(func) {
     if (!_isChallenge || !Reflect.isFunction(func)) return;
 
-    func((_challengeData.type == "global"), _challengeData._challData.challenge_identifier, _challengeData);
+    var _type = (_challengeData.type == "global");
+    var completeChall = func(_type, _challengeData._challData.challenge_identifier, _challengeData);
+    if (completeChall == true && !_challengeCompleted) complete_challenge();
+    
+    for (extraAddon in _challengeData._challData.challengeAddons) func(_type, extraAddon.challenge_identifier, extraAddon);
 } 
 
 var camChallenge:FlxCamera;
