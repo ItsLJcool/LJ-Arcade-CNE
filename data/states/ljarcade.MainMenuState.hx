@@ -283,9 +283,6 @@ function update(elapsed) {
         }
         FlxG.switchState(new ModState("GameJolt Login"));
     }
-
-    // if (FlxG.keys.justPressed.L) 
-    //     FlxG.switchState(new ModState("TestAPI")); 
 }
 
 function doFunnyTest() {

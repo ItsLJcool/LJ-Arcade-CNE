@@ -88,7 +88,7 @@ function postCreate() {
                         strum.members[rand].camera = _splitCam;
                     }
                 case "gay":
-                    if (!_RANDOMGAY) gay(strum);
+                    gay(strum);
             }
         });
         if (strum.opponentSide) return;
