@@ -387,7 +387,7 @@ function setupEvents() {
         1.0, bouncyStrum0,
         1.0, bouncyStrum1
     ");
-    set(132, "
+    ease(132, 1, "quadInOut", "
         1.0, bouncyStrum0,
         1.0, bouncyStrum1
     ");
@@ -408,11 +408,11 @@ function beatHit(curBeat:Int) {
     if (curBeat % 2 == 1) intense = -intense;
     for (i in 0...strumLines.members.length) {
         intense = -intense;
-        tweenModifierValue("other_strumLineRotateXP"+i, intense, 0.05, FlxEase.quadInOut);
-        tweenModifierValue("other_strumLineRotateYP"+i, intense, 0.05, FlxEase.quadInOut);
+        tweenModifierValue("strumLineRotateXP"+i, intense, 0.05, FlxEase.quadInOut);
+        tweenModifierValue("strumLineRotateYP"+i, intense, 0.05, FlxEase.quadInOut);
         new FlxTimer().start(0.05, function(timer) {
-            tweenModifierValue("other_strumLineRotateXP"+i, 0, 0.25, FlxEase.quadInOut);
-            tweenModifierValue("other_strumLineRotateYP"+i, 0, 0.25, FlxEase.quadInOut);
+            tweenModifierValue("strumLineRotateXP"+i, 0, 0.25, FlxEase.quadInOut);
+            tweenModifierValue("strumLineRotateYP"+i, 0, 0.25, FlxEase.quadInOut);
         });
     }
 }
@@ -426,7 +426,7 @@ var _strumMoveOnHit:Bool = false;
 function onNoteHit(event) {
     if (!_strumMoveOnHit) return;
     var strumIdx = strumLines.members.indexOf(event.note.strumLine);
-    var intense = 15;
+    var intense = 10;
     switch(event.note.noteData % 4) {
         case 0:
             tweenModifierValue("other_"+strumIdx+"x", -intense, 0.05, FlxEase.quadInOut);
