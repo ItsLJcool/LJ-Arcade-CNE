@@ -63,28 +63,19 @@ function setupModifiers() {
             ", i, strm.ID);
 
         });
+        createModifier("other_"+i+"x", 0, "", i, -1, 0, false);
         createModifier("_"+i+"x", 0, "
-            x += _"+i+"x"+"_value;
+            x += (_"+i+"x"+"_value) + (other_"+i+"x"+"_value);
         ", i, -1, 0);
-        
-        createModifier("other_"+i+"x", 0, "
-            x += other_"+i+"x"+"_value;
-        ", i, -1, 0);
-        
+
+        createModifier("other_"+i+"y", 0, "", i, -1, 0, false);
         createModifier("_"+i+"y", 0, "
-            y += _"+i+"y"+"_value;
+            y += (_"+i+"y"+"_value) + (other_"+i+"y"+"_value);
         ", i, -1, 0);
         
-        createModifier("other_"+i+"y", 0, "
-            y += other_"+i+"y"+"_value;
-        ", i, -1, 0);
-        
+        createModifier("other_"+i+"z", 0, "", i, -1, 0, false);
         createModifier("_"+i+"z", 0, "
-            z += _"+i+"z"+"_value;
-        ", i, -1, 0);
-        
-        createModifier("other_"+i+"z", 0, "
-            z += other_"+i+"z"+"_value;
+            z += (_"+i+"z"+"_value) + (other_"+i+"z"+"_value);
         ", i, -1, 0);
         
         createModifier("_"+i+"a", 1, "
@@ -117,11 +108,14 @@ function setupModifiers() {
             angleZ += strumLineRotateZP"+(i)+"_value;
         ";
         createModifier("strumLineRotateP"+(i), 1.0, funny, i);
+        funny = StringTools.replace(funny, "strumLineRotateXP"+(i), "other_strumLineRotateXP"+(i));
         funny = StringTools.replace(funny, "strumLineRotateYP"+(i), "other_strumLineRotateYP"+(i));
+        funny = StringTools.replace(funny, "strumLineRotateZP"+(i), "other_strumLineRotateZP"+(i));
         createModifier("other_strumLineRotateP"+(i), 1.0, funny, i);
     
-        createModifier("strumLineNotITG_P"+(i), 50, "
-            z += sin(curPos*0.01) * strumLineNotITG_P"+(i)+"_value;
+        createModifier("strumLineNotITG_P"+(i), 75, "
+            if (curPos < 0.0)
+                z += sin((curPos+songPosition)*0.005) * strumLineNotITG_P"+(i)+"_value;
         ", i);
 
         createModifier("centerX"+i, 0.0, "", i, -1, 0.0, false);
@@ -138,6 +132,27 @@ function setupModifiers() {
             x += (centerX"+(i)+"_value + cos(radians) * radius"+(i)+"_value) * circleRadius"+(i)+"_value;
             y += (centerY"+(i)+"_value + sin(radians) * radius"+(i)+"_value) * circleRadius"+(i)+"_value;
         ", i);
+
+        createModifier("bouncyStrum"+i, 0.0, "
+            // Bounce cycle duration in milliseconds (e.g., 2 seconds per cycle)
+            float bounceDuration = 450.0;
+            float normalizedTime = mod(songPosition, bounceDuration) / bounceDuration;
+
+            // Variables for bounce effect
+            float yPosition = 0.0; // The current y position of the strumline
+            float bounceHeight = 50.0; // The height the strumline will bounce
+
+            // Inline calculations for easing functions
+            float circOut = sqrt(1.0 - pow(normalizedTime - 1.0, 2.0)); // Approximation of easeCircOut
+            float sineIn = 1.0 - cos((normalizedTime * PI) / 2.0); // Approximation of easeSineIn
+
+            yPosition += bounceHeight * circOut;
+            yPosition -= bounceHeight * sineIn;
+            // yPosition += 150.0;
+
+            // Update the y position
+            y += yPosition * bouncyStrum"+i+"_value;
+        ", i, -1);
 	} 
 
     createModifier("beat_mult", 0.02, "", -1, -1, 0.02, false);
@@ -225,7 +240,6 @@ function setupEvents() {
         a: 1,
     });
 
-    var beatsToBeat = [32, 33.5, 34.5];
     for (i in 0...2) {
         ease_moveStrum({
             time: 15,
@@ -299,6 +313,11 @@ function setupEvents() {
         strumLineID: 0,
         x: get_middleX(0),
     });
+
+    set(100, "
+        1.0, bouncyStrum0_value;
+        1.0, bouncyStrum1_value;
+    ");
     
     ease_moveStrum({
         time: 104,
@@ -350,9 +369,8 @@ function setupEvents() {
         dur: 1,
         ease: "circOut",
         strumLineID: 0,
-        x: -300,
-        y: 100,
-        z: 400
+        x: 0,
+        y: 0,
     });
     
     ease_moveStrum({
@@ -365,6 +383,38 @@ function setupEvents() {
     
     set(32, "2.0, beat");
     set(64, "0.0, beat");
+    set(132, "
+        1.0, bouncyStrum0,
+        1.0, bouncyStrum1
+    ");
+    set(132, "
+        1.0, bouncyStrum0,
+        1.0, bouncyStrum1
+    ");
+    ease(196, 1, "quadInOut", "
+        0.0, bouncyStrum0,
+        0.0, bouncyStrum1,
+    ");
+}
+
+var _beatAngle:Bool = false;
+function beatHit(curBeat:Int) {
+    switch(curBeat) {
+        case 132, 204: _beatAngle = !_beatAngle;
+        case 288: _strumMoveOnHit = false;
+    }
+    if (!_beatAngle) return;
+    var intense = 5;
+    if (curBeat % 2 == 1) intense = -intense;
+    for (i in 0...strumLines.members.length) {
+        intense = -intense;
+        tweenModifierValue("other_strumLineRotateXP"+i, intense, 0.05, FlxEase.quadInOut);
+        tweenModifierValue("other_strumLineRotateYP"+i, intense, 0.05, FlxEase.quadInOut);
+        new FlxTimer().start(0.05, function(timer) {
+            tweenModifierValue("other_strumLineRotateXP"+i, 0, 0.25, FlxEase.quadInOut);
+            tweenModifierValue("other_strumLineRotateYP"+i, 0, 0.25, FlxEase.quadInOut);
+        });
+    }
 }
 
 function onStrumCreation(event) event.cancelAnimation();
@@ -377,13 +427,6 @@ function onNoteHit(event) {
     if (!_strumMoveOnHit) return;
     var strumIdx = strumLines.members.indexOf(event.note.strumLine);
     var intense = 15;
-    var funnyLol = function() {
-        tweenModifierValue("other_"+strumIdx+"x", 0, 0.5, FlxEase.quadOut);
-        tweenModifierValue("other_"+strumIdx+"y", 0, 0.5, FlxEase.quadOut);
-        tweenModifierValue("other_strumLineRotateXP"+strumIdx, 0, 0.5, FlxEase.quadOut);
-        tweenModifierValue("other_strumLineRotateYP"+strumIdx, 0, 0.5, FlxEase.quadOut);
-    };
-    funnyLol();
     switch(event.note.noteData % 4) {
         case 0:
             tweenModifierValue("other_"+strumIdx+"x", -intense, 0.05, FlxEase.quadInOut);
@@ -391,10 +434,10 @@ function onNoteHit(event) {
             tweenModifierValue("other_strumLineRotateYP"+strumIdx, -intense*0.5, 0.05, FlxEase.quadInOut);
         case 1:
             tweenModifierValue("other_"+strumIdx+"y", -intense, 0.05, FlxEase.quadInOut);
-            tweenModifierValue("other_strumLineRotateYP"+strumIdx, -intense*0.5, 0.05, FlxEase.quadInOut);
+            tweenModifierValue("other_strumLineRotateXP"+strumIdx, -intense*0.5, 0.05, FlxEase.quadInOut);
         case 2: 
             tweenModifierValue("other_"+strumIdx+"y", intense, 0.05, FlxEase.quadInOut);
-            tweenModifierValue("other_strumLineRotateYP"+strumIdx, intense*0.5, 0.05, FlxEase.quadInOut);
+            tweenModifierValue("other_strumLineRotateXP"+strumIdx, intense*0.5, 0.05, FlxEase.quadInOut);
         case 3:
             tweenModifierValue("other_"+strumIdx+"x", intense, 0.05, FlxEase.quadInOut);
             tweenModifierValue("other_strumLineRotateXP"+strumIdx, intense*0.5, 0.05, FlxEase.quadInOut);
@@ -403,7 +446,12 @@ function onNoteHit(event) {
     if (_noteHitTimer[strumIdx] == null) _noteHitTimer[strumIdx] = new FlxTimer().start(0);
     var timer = _noteHitTimer[strumIdx];
     timer.cancel();
-    timer.start(0.1, funnyLol);
+    timer.start(0.1, function(timer) {
+        tweenModifierValue("other_"+strumIdx+"x", 0, 0.5, FlxEase.quadOut);
+        tweenModifierValue("other_"+strumIdx+"y", 0, 0.5, FlxEase.quadOut);
+        tweenModifierValue("other_strumLineRotateXP"+strumIdx, 0, 0.5, FlxEase.quadOut);
+        tweenModifierValue("other_strumLineRotateYP"+strumIdx, 0, 0.5, FlxEase.quadOut);
+    });
 }
 
 function ease_moveStrumNote(_data:Dynamic) {
