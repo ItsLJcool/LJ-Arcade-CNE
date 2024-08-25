@@ -50,6 +50,7 @@ function destroy() {
     PlayState.SONG = _prevSONGdata;
     for (key in _soundsMap.keys()) key.destroy();
     for (key in _camerasMap.keys()) key.removeShader(blurShader);
+    FlxG.game.removeShader(blurShader);
     blurShader = null;
     FlxG.sound.soundTray.filters = [];
 }
@@ -65,6 +66,8 @@ function postCreate() {
     check_challenge_data(function(isGlobal, challengeID, data) {
         if (!isGlobal) return;
         switch(challengeID) {
+            case "visually_impaired":
+                FlxG.game.addShader(blurShader);
             case "strum_split":
                 _splitCam = new HudCamera();
                 _splitCam.bgColor = 0;
@@ -312,7 +315,7 @@ function postUpdate(elapsed) {
         switch(challengeID) {
             case "visually_impaired":
                 for (sound in FlxG.sound.list) muffle(sound);
-                for (cam in FlxG.cameras.list) cameraBlur(cam);
+                // for (cam in FlxG.cameras.list) cameraBlur(cam);
 
                 blurShader.entropy = FlxG.random.float(0, 1);
                 

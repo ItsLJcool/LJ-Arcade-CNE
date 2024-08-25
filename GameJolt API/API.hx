@@ -76,7 +76,6 @@ public function get_data(key:String, ?userData:Bool = false) {
 	return data;
 }
 
-
 public function fetchUser(username:String) {
     var data = parse(NdllUtil.getFunction(ndllName, "fetchUser", 1)(username));
 	if (!data.success) return false;

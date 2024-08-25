@@ -14,7 +14,7 @@ var _maxDiff:Int = 3; // changable in the future
 var _maxHours:Int = 48;
 var _minHours:Int = 1;
 var _defualtHours:Int = 24;
-public function new_challenge(name:String, challenge_id:String, ?diff:Int = 1, ?time_hours:Int = 0, ?challengeAdd:Array<String> = []) {
+public function new_challenge(name:String, challenge_id:String, ?diff:Int = 1, ?time_hours:Int, ?challengeAdd:Array<String> = []) {
     if (diff == null) diff = _minDiff;
     if (time_hours == null) time_hours = _defualtHours;
     if (challengeAdd == null) challengeAdd = [];

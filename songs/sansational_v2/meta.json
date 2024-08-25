@@ -1,0 +1,16 @@
+{
+	"beatsPerMeasure": 4,
+	"opponentModeAllowed": false,
+	"coopAllowed": false,
+	"stepsPerBeat": 4,
+	"bpm": 130,
+	"difficulties": [
+		"hard"
+	],
+	"needsVoices": false,
+	"parsedColor": -1,
+	"displayName": "Sansational V2",
+	"icon": "Icon",
+	"name": "sansational_v2",
+	"color": "#FFFFFF"
+}

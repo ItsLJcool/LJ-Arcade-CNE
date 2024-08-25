@@ -129,7 +129,7 @@ function preStateSwitch() {
                 StringTools.contains(path, customPrefix+".") ||
                 StringTools.contains(path, "LJ Arcade API") ||
                 StringTools.contains(path, "GameJolt API")
-            ) return null;
+            ) return new DummyScript();
             var script = Script.create(Paths.script(path));
             if (script is DummyScript) return null;
             GlobalScript.scripts.add(script);
@@ -209,7 +209,7 @@ function preStateSwitch() {
 	}
     if (!possibleState) {
         trace("uh oh! Not an LJ Arcade state, get fucked!");
-        FlxG.game._requestedState = new ModState("ModMainMenu");
+        FlxG.game._requestedState = new MainMenuState();
     }
 
 	if (!initialized) {
@@ -219,7 +219,6 @@ function preStateSwitch() {
             GameJolt.token = FlxG.save.data.GameJoltToken;
             usingGameJolt = true;
         }
-		// FlxG.game._requestedState = new ModState('WarningState');
 	} else {
         for (state in allStates) {
             var fileName = Path.withoutExtension(state);
@@ -258,6 +257,7 @@ static function loadAndPlaySong(songName:String, diff:String = "hard", ?opponent
     returns true on success, false if not added (because it already is) or on error
 **/
 static function loadModToLibrary(modToLoad:String) {
+    if (modToLoad == null) return false;
     for (mod in ModsFolder.getLoadedMods()) {
         var modSplit = mod.split("/");
         var actualMod = modSplit[modSplit.length-1];
