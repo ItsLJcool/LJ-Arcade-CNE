@@ -39,6 +39,7 @@ import funkin.editors.ui.UIState;
 import StringTools;
 import Reflect;
 import Type;
+import openfl.utils.AssetLibrary as OpenFlAssetLibrary;
 
 importScript("LJ Arcade API/_challengeGameJolt");
 importScript("LJ Arcade API/challenges");
@@ -263,7 +264,15 @@ static function loadModToLibrary(modToLoad:String) {
         var actualMod = modSplit[modSplit.length-1];
         if (actualMod.toLowerCase() == modToLoad.toLowerCase()) return false;
     }
+    
     var modLoaded = Paths.assetsTree.addLibrary(ModsFolder.loadModLib(ModsFolder.modsPath+modToLoad, modToLoad));
+    var internalLib = {
+        if (modLoaded is OpenFlAssetLibrary) {
+             if (modLoaded.__proxy != null) modLoaded = modLoaded.__proxy;
+        }
+        modLoaded;
+    }
+    internalLib.modName = modToLoad;
     _loadedModAssetLibrary[modToLoad] = modLoaded;
     return true;
 }

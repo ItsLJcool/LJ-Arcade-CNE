@@ -112,7 +112,7 @@ public static var GameJolt = {
 	lastUnlockedTrophy: null,
 	unlockTrophy: function(trophyId) {
 		if (!usingGameJolt) return { message: "Not logged into gamejolt", success: false };
-
+		
 		var id:Int = trophyId;
 		var trophy = GameJolt.getUser('trophies', [{name: 'trophy_id', value: id}]).trophies[0];
 		trace(trophy);

@@ -47,6 +47,7 @@ function _addNoteType(noteType:String) {
 }
 
 function destroy() {
+    trace("destroy!!");
     PlayState.SONG = _prevSONGdata;
     for (key in _soundsMap.keys()) key.destroy();
     for (key in _camerasMap.keys()) key.removeShader(blurShader);
@@ -68,14 +69,13 @@ function postCreate() {
         switch(challengeID) {
             case "visually_impaired":
                 FlxG.game.addShader(blurShader);
+                for (muff in [inst, vocals]) muffle(muff);
             case "strum_split":
                 _splitCam = new HudCamera();
                 _splitCam.bgColor = 0;
                 _splitCam.downscroll = !camHUD.downscroll;
                 FlxG.cameras.add(_splitCam, false);
             case "gay": _RANDOMGAY = FlxG.random.bool(1);
-            case "visually_impaired":
-                for (muff in [inst, vocals]) muffle(muff);
         }
     });
 
