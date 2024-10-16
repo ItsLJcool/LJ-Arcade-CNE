@@ -6,6 +6,7 @@ import funkin.game.HudCamera;
 import funkin.backend.scripting.DummyScript;
 import funkin.backend.scripting.Script;
 import flixel.system.FlxSound;
+import flixel.addons.display.FlxBackdrop;
 
 import openfl.filters.ShaderFilter;
 import lime.media.openal.AL;
@@ -392,6 +393,7 @@ function trustTheProcess(cum:Array<FlxBasic>) {
             if(Std.isOfType(spr, FlxSprite)) {
                 if(gayMap.exists(spr)) continue;
                 gayMap.set(spr, 0);
+                spr.shaderEnabled = true;
                 spr.shader = new CustomShader("ljarcade.gay");
                 spr.shader.flag = getPrideFlag();
             }

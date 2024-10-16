@@ -264,15 +264,8 @@ static function loadModToLibrary(modToLoad:String) {
         var actualMod = modSplit[modSplit.length-1];
         if (actualMod.toLowerCase() == modToLoad.toLowerCase()) return false;
     }
-    
-    var modLoaded = Paths.assetsTree.addLibrary(ModsFolder.loadModLib(ModsFolder.modsPath+modToLoad, modToLoad));
-    var internalLib = {
-        if (modLoaded is OpenFlAssetLibrary) {
-             if (modLoaded.__proxy != null) modLoaded = modLoaded.__proxy;
-        }
-        modLoaded;
-    }
-    internalLib.modName = modToLoad;
+
+    var modLoaded = Paths.assetsTree.addLibrary(ModsFolder.loadModLib(ModsFolder.modsPath+modToLoad, false, modToLoad));
     _loadedModAssetLibrary[modToLoad] = modLoaded;
     return true;
 }
